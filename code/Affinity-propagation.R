@@ -37,8 +37,8 @@ all.features.affinity <- all.features
 
 ## make a new column with the cluster ID (exemplar number)
 all.features.affinity$affinity.id <- as.factor(cluster.dfq0@idx)
-write.csv(all.features.affinity,'affinity_clusters_46-features.csv',row.names = F)
-all.features.affinity <- read.csv('affinity_clusters_46-features.csv')
+write.csv(all.features.affinity,'affinity_clusters.csv',row.names = F)
+all.features.affinity <- read.csv('affinity_clusters.csv')
 
 all.features.affinity$Pulse.Type <- factor(all.features.affinity$Pulse.Type, levels = c("HU", "VO", "HR","LR", "IN", "SI"))
 all.features.affinity$affinity.id <- as.factor(all.features.affinity$affinity.id)

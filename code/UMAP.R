@@ -8,7 +8,7 @@ setwd('/Users/Wendy/github/orangutan-vocal-complexity/data')
 
 ####Read in features 
 all.features <- read.csv('46-features.csv')
-all.features.affinity <- read.csv('affinity_clusters_46-features.csv')
+all.features.affinity <- read.csv('affinity_clusters.csv')
 all.features.fuzzy <- read.csv('fanny_typicality.csv')
 raw.spectrograms <- read.csv('raw_spectrogram_umap_dimensions.csv')
 
@@ -34,8 +34,8 @@ myplot.for.OrangPulseAffinity <-
     colour = Cluster
   )) +
   geom_point(size = 1.5) +
-  theme_classic() + ggtitle('Affinity propagation') + 
-  xlab('UMAP: Dim 1')+ylab('UMAP: Dim 2')#+ theme(legend.position = "none") 
+  theme_classic() + ggtitle('Affinity propagation') + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
+  
 
 myplot.for.OrangPulseAffinity
 
@@ -57,8 +57,7 @@ myplot.for.OrangPulseFuzzy <-
     alpha = Typical
   )) +
   geom_point(size = 1.5) +
-  theme_classic() + ggtitle('Fuzzy cluster') + 
-  xlab('UMAP: Dim 1') + ylab('UMAP: Dim 2') + labs(fill = "Cluster")
+  theme_classic() + ggtitle('Fuzzy cluster') + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + labs(fill = "Cluster")
 
 myplot.for.OrangPulseFuzzy
 
@@ -80,8 +79,7 @@ myplot.for.OrangPulseHumanID <-
     colour = Pulse
   )) +
   geom_point(size = 1.5) +
-  theme_classic() + ggtitle('Audio-visual: feature set') + 
-  xlab('UMAP: Dim 1')+ylab('UMAP: Dim 2')#+ theme(legend.position = "none") 
+  theme_classic() + ggtitle('Audio-visual: feature set') + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) 
 
 myplot.for.OrangPulseHumanID
 
@@ -89,20 +87,20 @@ myplot.for.OrangPulseHumanID
 raw.spectrograms$Pulse <- factor(raw.spectrograms$Pulse, levels = c("HU", "VO", "HR","LR", "IN", "SI"))
 
 plot.for.OrangPulseSpectrograms <-
-  cbind.data.frame(umap.dimensions.Spectrograms$layout[,1:2])
+  cbind.data.frame(raw.spectrograms$layout[,2:3])
 
 colnames(plot.for.OrangPulseSpectrograms) <-
   c("Dim.1", "Dim.2")
 
 myplot.for.OrangPulseSpectrograms <-
-  ggplot(data = umap.Spectrograms, aes(
+  ggplot(data = raw.spectrograms, aes(
     x = Dim.1,
     y = Dim.2,
     colour = Pulse
   )) +
   geom_point(size = 1.5) +
-  theme_classic() + ggtitle('Audio-visual: raw spectrogram') + 
-  xlab('UMAP: Dim 1')+ylab('UMAP: Dim 2')#+ theme(legend.position = "none") 
+  theme_classic() + ggtitle('Audio-visual: raw spectrogram') + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
+
 myplot.for.OrangPulseSpectrograms
 
 ## Cowplot for all UMAP plots
