@@ -26,7 +26,7 @@ cluster.dfq0 <- apcluster::apcluster(
 
 cluster.dfq0
 
-silq0 <- cluster::silhouette(x = cluster.dfq0@idx, dist = dist(all.features[, -c(1:10)]))
+silq0 <- cluster::silhouette(x = cluster.dfq0@idx, dist = dist(all.features[, -c(47:48)]))
 summary(silq0)
 
 sil.coef <- summary(silq0)$avg.width

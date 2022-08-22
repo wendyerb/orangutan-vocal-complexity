@@ -24,7 +24,7 @@ str(all.features)
 tune.sig.method.1.all <-
   tune(
     svm,
-    all.features[, 2:47],
+    all.features[, 1:46],
     all.features$Pulse.Type,
     kernel = "sigmoid",
     ranges = list(
@@ -40,7 +40,7 @@ gamma.sig.all ## 0.001
 
 svm.sig.method.1.all <-
   svm(
-    all.features[, 2:47],
+    all.features[, 1:46],
     all.features$Pulse.Type,
     kernel = "sigmoid",
     cost = cost.sig,
@@ -75,7 +75,7 @@ str(svm.rfe.output)
 
 ##### Reorder the data so highest ranked feature is first
 new.svm.rfe <-
-  all.features[, 2:ncol(all.features)][, dput(svm.rfe.output)]
+  all.features[, 1:ncol(all.features)][, dput(svm.rfe.output)]
 str(new.svm.rfe)
 
 ## Center.Freq.Hz 
@@ -106,7 +106,7 @@ for (j in 2:length(svm.rfe.output)) {
 
 ##### Run LDA on the data subset using RFE
 fit.standard.number.windows.svm.rfe <- lda(
-    svm.rfe.for.classification[2:ncol(svm.rfe.for.classification)],
+    svm.rfe.for.classification[1:ncol(svm.rfe.for.classification)],
     center = TRUE,
     prior = rep(1 / n.pulses, n.pulses),
     scale. = TRUE,
@@ -148,7 +148,3 @@ ct
 ##### Calculate total percent correct
 percent <- sum(diag(prop.table(ct)))
 print(percent) 
-
-
-
-
