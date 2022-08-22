@@ -2,6 +2,7 @@
 
 library(irr)
 
+#### Set working directory
 setwd('/Users/Wendy/github/orangutan-vocal-complexity/data')
 
 ## Read in csv files
