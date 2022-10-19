@@ -8,11 +8,8 @@
 library(MASS)
 library(e1071)
 
-#### Set working directory
-setwd('/Users/Wendy/github/orangutan-vocal-complexity/data')
-
 ####Read in features 
-all.features <- read.csv('46-features.csv')
+all.features <- read.csv('data/46-features.csv')
 
 ####Make pulse type a factor
 all.features$Pulse.Type <- as.factor(all.features$Pulse.Type) 
@@ -35,7 +32,7 @@ tune.sig.method.1.all <-
 
 cost.sig.all <- tune.sig.method.1.all$best.parameters$cost
 cost.sig.all ## 100
-gamma.sig.all <-  tune.sig.method.1$best.parameters$gamma
+gamma.sig.all <-  tune.sig.method.1.all$best.parameters$gamma
 gamma.sig.all ## 0.001
 
 svm.sig.method.1.all <-
@@ -43,8 +40,8 @@ svm.sig.method.1.all <-
     all.features[, 1:46],
     all.features$Pulse.Type,
     kernel = "sigmoid",
-    cost = cost.sig,
-    gamma = gamma.sig,
+    cost = cost.sig.all,
+    gamma = gamma.sig.all,
     cross = nrow(all.features) # When cross = number of observations this indicates leave-one-out cross-validation
   )
 
@@ -66,11 +63,15 @@ summary(svm.sig.method.1.all)
 ##### Recursive Feature Elimination #### -------------------------
 
 ##### Set source code (downloaded from https://github.com/johncolby/SVM-RFE)
-source("/Users/Wendy/github/orangutan-vocal-complexity/code/msvmRFE.R")
+source("code/msvmRFE.R")
 
 ##### The first column needs to include class labels
+all.features.temp <- all.features[,-c(47)]
+Pulse.Type <- all.features$Pulse.Type
+
+all.features.rfe <- cbind.data.frame(Pulse.Type,all.features.temp)
 ##### We want k=10 for the k-fold cross validation as the “multiple” part of mSVM-RFE.
-svm.rfe.output <- svmRFE(all.features, k = 10, halve.above = 100)
+svm.rfe.output <- svmRFE(all.features.rfe, k = 10, halve.above = 100)
 str(svm.rfe.output) 
 
 ##### Reorder the data so highest ranked feature is first
