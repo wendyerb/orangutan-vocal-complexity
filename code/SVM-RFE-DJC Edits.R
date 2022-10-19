@@ -101,20 +101,3 @@ ct_svm
 percent <- sum(diag(prop.table(ct_svm)))
 print(percent) 
 
-
-## LDA
-fit.lda.rfe.all <- lda(
-  all.features[,-(47)],
-  center = TRUE,
-  prior = rep(1 / n.pulses, n.pulses),
-  scale. = TRUE,
-  grouping = all.features$Pulse.Type,
-  CV = T
-)
-
-ct_lda <- table(grouping = all.features$Pulse.Type, fit.lda.rfe.all$class)
-ct_lda
-
-##### Calculate total percent correct_lda
-percent <- sum(diag(prop.table(ct_lda)))
-print(percent) 
