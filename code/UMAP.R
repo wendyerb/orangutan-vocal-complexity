@@ -86,12 +86,6 @@ myplot.for.OrangPulseHumanID
 ## Create UMAP based on raw spectrograms with raw spectrograms
 raw.spectrograms$Pulse <- factor(raw.spectrograms$Pulse, levels = c("HU", "VO", "HR","LR", "IN", "SI"))
 
-plot.for.OrangPulseSpectrograms <-
-  cbind.data.frame(raw.spectrograms$layout[,2:3])
-
-colnames(plot.for.OrangPulseSpectrograms) <-
-  c("Dim.1", "Dim.2")
-
 myplot.for.OrangPulseSpectrograms <-
   ggplot(data = raw.spectrograms, aes(
     x = Dim.1,
