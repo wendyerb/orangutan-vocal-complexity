@@ -91,7 +91,6 @@ ggpubr::ggviolin(data=Affinity.rand.df,
 # SVM ---------------------------------------------------------------------
 
 N.samples.svm <- c(100, 200, 300, 400, 500, 600, 700, 800, 900)
-N.randomization.svm <- 25
 
 
 SVM.rand.df <- data.frame()
@@ -145,5 +144,72 @@ SVM.rand.df$n.samples <- as.factor(SVM.rand.df$n.samples)
 levels(SVM.rand.df$n.samples) <- N.samples.svm
 
 ggpubr::ggboxplot(data=SVM.rand.df,
-                  x='n.samples', y='svm.accuracy',outlier.shape = NA)
+                  x='n.samples', y='svm.accuracy',outlier.shape = NA)+stat_compare_means(aes(label = after_stat(p.signif)),method = "t.test", ref.group = "900")
+
+
+
+# Randomly select features ---------------------------------------------------------------------
+####Read in features 
+all.features <- read.csv('data/46-features.csv')
+
+#### Check distribution of pulse types
+table(all.features$Pulse.Type)
+
+####Make pulse type a factor
+all.features$Pulse.Type <- factor(all.features$Pulse.Type, levels = c("HU", "VO", "HR","LR", "IN", "SI"))
+
+### Loop to randomize
+Affinity.feature.df <- data.frame()
+
+N.features <- c(2,4,8,16,32,40)
+N.randomization.affinity <- 25
+
+for(b in 12:(N.randomization.affinity)){
+for(a in 1:length(N.features)){   
+ 
+  Samples.vec <- sample( c(1:ncol(all.features)), size = N.features[a], replace = FALSE)
+  
+  all.features.sub <- all.features[,Samples.vec]
+  
+  # Affinity prop clustering by pulse type with q set to 0
+  # q is set to zero based on manual iterations over different values of q
+  cluster.dfq0 <- apcluster::apcluster(
+    negDistMat(r = 2), q=0,
+    all.features.sub,
+    maxits = 5000,
+    convits = 500,
+    nonoise = T
+  )
+  
+  cluster.dfq0
+  
+  silq0 <- cluster::silhouette(x = cluster.dfq0@idx, dist = dist(all.features.sub))
+  summary(silq0)
+  
+  if(length(cluster.dfq0@exemplars) >1){
+    
+    sil.coef <- summary(silq0)$avg.width
+    sil.coef 
+    
+    n.clusters <- length(cluster.dfq0@exemplars)
+    
+    Temp.row <- cbind.data.frame(n.clusters,sil.coef,a,b)
+    print(Temp.row)
+  } else{
+    Temp.row <- cbind.data.frame(1,NA,a,b)
+  }
+  
+  colnames(Temp.row) <- c('n.clusters','sil.coef','n.samples','randomization')
+  Affinity.feature.df <-  rbind.data.frame(Affinity.feature.df,Temp.row)
+  
+}
+}
+
+
+Affinity.feature.df$n.features <- as.factor(Affinity.feature.df$n.samples)
+levels(Affinity.feature.df$n.features) <- N.features
+
+ggpubr::ggviolin(data=Affinity.feature.df,
+                  x='n.features', y='n.clusters')
+
 
