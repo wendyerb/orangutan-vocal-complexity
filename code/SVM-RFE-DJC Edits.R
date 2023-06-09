@@ -100,4 +100,5 @@ ct_svm
 ##### Calculate total percent correct_svm
 percent <- sum(diag(prop.table(ct_svm)))
 print(percent) 
-
+stringr::str_dete
+list.files("T:\\projects\\2016_UCDavis_Borneo_T0010\\T0010_SEAsia\\T0010_DV01_FLAC\\T0010_DV01_S01_SWIFT01\\",recursive=T)

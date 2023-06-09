@@ -3,10 +3,10 @@ library(cluster)
 library(clValid)
 
 #### Set working directory
-setwd('/Users/Wendy/github/orangutan-vocal-complexity/data')
+#setwd('/Users/Wendy/github/orangutan-vocal-complexity/data')
 
 ####Read in features 
-all.features <- read.csv('46-features.csv')
+all.features <- read.csv('data/46-features.csv')
 
 ## Read in and scale data
 z_all.features<-scale(all.features[1:46], center = TRUE, scale = TRUE)
@@ -16,6 +16,9 @@ z_all.features<-scale(all.features[1:46], center = TRUE, scale = TRUE)
 intvalid <- clValid(z_all.features, 2:7, clMethods=c("fanny"),
                     validation="internal")
 summary(intvalid)
+
+# Return a hard cluster based on highest membership
+attr(intvalid@measures)
 
 ## Stability
 stable <- clValid(z_all.features, 2:7, clMethods=c("fanny"),
@@ -27,12 +30,14 @@ summary(stable)
 ## Interate memb.exp (1.1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5) to find best solution
 k2u11 <- fanny(z_all.features, k = 2, memb.exp = 1.1)
 summary(k2u11)
+
+
 # Export chosen element of output to CSV
 write.csv(k2u11$clustering, file = "K2U11_cluster.csv")
 
 
 ## Read in file with typicality coefficients
-Typicality <- read.csv('fanny_typicality.csv')
+Typicality <- read.csv('data/fanny_typicality.csv')
 str(Typicality)
 
 ## Separate data frames for typical and atypical calls
