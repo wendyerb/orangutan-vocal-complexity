@@ -28,7 +28,6 @@ all.features.svm <- all.features
 # Remove pulse type
 all.features <- subset(all.features, select=-c(Pulse.Type))
 
-
 N.samples <- c(100, 200, 300, 400, 500, 600, 700, 800, 900)
 N.randomization <- 25
 
@@ -108,7 +107,8 @@ ggpubr::ggviolin(data=Affinity.rand.df,
 
 
 # Fuzzy ---------------------------------------------------------------------
-
+# Read in data
+all.features <- read.csv('data/46-features.csv')
 
 # Remove pulse type
 all.features <- subset(all.features, select=-c(Pulse.Type))
@@ -130,11 +130,11 @@ for(a in 1:length(N.samples)){
     all.features.sub <- z_all.features[Samples.vec,]
     
     ## Interate memb.exp (1.1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5) to find best solution
-    k.vals <- seq(1,10)
     
     sil.coef.list <- list()
     for(c in 1:length(mebexp.vals)){
-    k2u11 <- fanny(all.features.sub, k = k.vals[c], memb.exp = 1)
+    k2u11 <-  clValid(all.features.sub, 2:7, clMethods=c("fanny"),
+              validation="internal")
     sil.coef <- k2u11$silinfo$avg.width
     sil.coef.list[[c]] <- sil.coef
     }
