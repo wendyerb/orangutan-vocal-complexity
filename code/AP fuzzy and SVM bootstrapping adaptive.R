@@ -7,8 +7,6 @@ library(tidyverse)
 library(e1071)
 library(cluster)
 library(clValid)
-library(tidyverse)
-
 
 #### Set working directory
 #setwd('/Users/Wendy/github/orangutan-vocal-complexity/data')
@@ -42,10 +40,33 @@ for(b in 1:N.randomization){
   
   all.features.sub <- all.features[Samples.vec,]
 
-# Affinity prop clustering by pulse type with q=0
+# Affinity prop clustering by pulse type with iterative q
+qvals <- seq(0.1,1,0.1)
+
+sil.df <- data.frame()
+
+for(c in 1:length(qvals)){
+cluster.dfq0 <- apcluster::apcluster(
+  negDistMat(r = 2), q=qvals[c],
+  all.features.sub,
+  maxits = 5000,
+  convits = 500,
+  nonoise = T
+)
+
+
+
+silq0 <- cluster::silhouette(x = cluster.dfq0@idx, dist = dist(all.features.sub))
+sil.coef <- summary(silq0)$avg.width
+qval <- qvals[c]
+TempRow <- cbind.data.frame(sil.coef,qval)
+sil.df <- rbind.data.frame(sil.df,TempRow)
+}
+
+maxq <- which.max(sil.df$sil.coef)
 
 cluster.dfq0 <- apcluster::apcluster(
-  negDistMat(r = 2), q=0,
+  negDistMat(r = 2), q=qvals[maxq],
   all.features.sub,
   maxits = 5000,
   convits = 500,
@@ -54,8 +75,7 @@ cluster.dfq0 <- apcluster::apcluster(
 
 
 if(length(cluster.dfq0@exemplars) >1){
-silq0 <- cluster::silhouette(x = cluster.dfq0@idx, dist = dist(all.features.sub))
-  
+
 sil.coef <- summary(silq0)$avg.width
 sil.coef 
 
@@ -73,7 +93,6 @@ write.csv(Affinity.rand.df,'data/Affinity.rand.df.csv')
 }
 }
 
-Affinity.rand.df <- read.csv('data/Affinity.rand.df.csv')
 Affinity.rand.df$n.samples <- as.factor(Affinity.rand.df$n.samples)
 levels(Affinity.rand.df$n.samples) <- N.samples
 
@@ -83,19 +102,8 @@ ggpubr::ggscatter(data=Affinity.rand.df,
 ggpubr::ggboxplot(data=Affinity.rand.df,
                   x='n.samples', y='n.clusters',outlier.shape = NA)
 
-Affinity.rand.df$n.clusters <- as.factor(Affinity.rand.df$n.clusters)
-
-
-complete.affinity <- complete(Affinity.rand.df, n.samples, n.clusters, fill = list(count = 0))
-
-ggpubr::gghistogram(data=complete.affinity,
-                  x='n.samples', group='n.clusters',
-                  fill='n.clusters', stat="count",position="dodge")+
-                  scale_x_discrete(drop = FALSE)+
-                  scale_fill_manual(values = matlab::jet.colors(5) )+
-  ylab('N iterations')+ xlab('N samples')+
-  labs(fill='N clusters')
-
+ggpubr::ggviolin(data=Affinity.rand.df,
+                  x='n.samples', y='n.clusters')
 
 
 # Fuzzy ---------------------------------------------------------------------
@@ -114,9 +122,8 @@ N.randomization <- 25
 
 fuzzy.rand.df <- data.frame()
 
-for(b in 1:N.randomization){
 for(a in 1:length(N.samples)){
-
+  for(b in 1:N.randomization){
     
     Samples.vec <- sample( c(1:nrow(all.features)), size = N.samples[a], replace = FALSE)
     
@@ -124,74 +131,51 @@ for(a in 1:length(N.samples)){
     
     ## Interate memb.exp (1.1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5) to find best solution
     
-       
     sil.coef.list <- list()
-    for(c in 2:7){
-      Fclustoutput <- fclust::Fclust (X = all.features.sub, k =  c, type = "medoids", noise = TRUE)
-      silq0 <- cluster::silhouette(x = Fclustoutput$clus[,1],  dist = dist(all.features.sub))
-      sil.coef.list[[c]] <- summary(silq0)$avg.width
+    for(c in 1:length(mebexp.vals)){
+    k2u11 <-  clValid(all.features.sub, 2:7, clMethods=c("fanny"),
+              validation="internal")
+    sil.coef <- k2u11$silinfo$avg.width
+    sil.coef.list[[c]] <- sil.coef
     }
     
-    sil.index <- which.max(unlist(sil.coef.list)[-1])
-    
-    max.sil <-  sil.coef.list[[(2:7) [sil.index]]]
-    NClust <- (2:7) [sil.index]
-    
-    Fclustoutput <- fclust::Fclust (X = all.features.sub, k =  NClust, type = "medoids", noise = TRUE)
-    
-    PulseHardAssignment <- Fclustoutput$clus[,1]
+    sil.index <- which.max(unlist(sil.coef.list))
+    max.sil <-  sil.coef.list[[which.max(unlist(sil.coef.list))]]
+    k2u11 <- fanny(all.features.sub, k =k.vals[c] , memb.exp =1)
+    PulseHardAssignment <- k2u11$clustering
     NPulseHardAssignment <- unique(PulseHardAssignment)
     
     
-   if(length(NPulseHardAssignment) >1){
-    
-     TypicalityList <- list()
-     for(c in 1:nrow( Fclustoutput$U)){
-            MaxMember <-   which.max(Fclustoutput$U[c,])
-            SecondMaxMember <-max(Fclustoutput$U[c,-MaxMember])
-            SecondMaxMember <-  which(Fclustoutput$U[c,]==SecondMaxMember)
-            # Substract second from first
-           TypicalityList[[c]] <- Fclustoutput$U[c,MaxMember] - Fclustoutput$U[c,SecondMaxMember]
-     }
-    
-     Typicality <- median(unlist(TypicalityList))
+    if(length(NPulseHardAssignment) >1){
+      
       sil.coef <- max.sil
       sil.coef 
       
       n.clusters <- length(NPulseHardAssignment)
       
-      Temp.row <- cbind.data.frame(n.clusters,sil.coef,a,b,Typicality)
+      Temp.row <- cbind.data.frame(n.clusters,sil.coef,a,b)
       print(Temp.row)
     } else{
-      Temp.row <- cbind.data.frame(1,NA,a,b,NA)
+      Temp.row <- cbind.data.frame(1,NA,a,b)
     }
     
-    colnames(Temp.row) <- c('n.clusters','sil.coef','n.samples','randomization','Typicality')
+    colnames(Temp.row) <- c('n.clusters','sil.coef','n.samples','randomization')
     fuzzy.rand.df <- rbind.data.frame(fuzzy.rand.df,Temp.row)
     write.csv(fuzzy.rand.df,'data/fuzzy.rand.df.csv')  
   }
 }
 
-fuzzy.rand.df <- subset(fuzzy.rand.df,n.samples!='NA')
-
 fuzzy.rand.df$n.samples <- as.factor(fuzzy.rand.df$n.samples)
 levels(fuzzy.rand.df$n.samples) <- N.samples
 
-fuzzy.rand.df$n.clusters <- as.factor(fuzzy.rand.df$n.clusters)
+ggpubr::ggscatter(data=fuzzy.rand.df,
+                  x='n.samples', y='n.clusters',position = position_jitter(0.00001))
 
-complete.fuzzy <- complete(fuzzy.rand.df, n.samples, n.clusters, fill = list(count = 0))
+ggpubr::ggboxplot(data=fuzzy.rand.df,
+                  x='n.samples', y='n.clusters',outlier.shape = NA)
 
-ggpubr::gghistogram(data=complete.fuzzy,
-                    x='n.samples', group='n.clusters',
-                    fill='n.clusters', stat="count",position="dodge")+
-  scale_x_discrete(drop = FALSE)+
-  scale_fill_manual(values = matlab::jet.colors(5) )+
-  ylab('N iterations')+
-  labs(fill='N clusters')
-
-# Membership coefficients correspond to the degree of being in a given cluster
-ggboxplot(data=fuzzy.rand.df, x='n.samples', y='Typicality')+
-  ylab('Mean typicality')+ xlab('N samples')
+ggpubr::ggviolin(data=fuzzy.rand.df,
+                 x='n.samples', y='n.clusters')
 
 # SVM ---------------------------------------------------------------------
 

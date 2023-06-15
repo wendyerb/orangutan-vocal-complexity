@@ -4,13 +4,13 @@ library(tidyverse)
 library(factoextra)
 
 #### Set working directory
-setwd('/Users/Wendy/github/orangutan-vocal-complexity/data')
+#setwd('/Users/Wendy/github/orangutan-vocal-complexity/data')
 
 ####Read in features 
-all.features <- read.csv('46-features.csv')
-all.features.affinity <- read.csv('affinity_clusters.csv')
-all.features.fuzzy <- read.csv('fanny_typicality.csv')
-raw.spectrograms <- read.csv('raw_spectrogram_umap_dimensions.csv')
+all.features <- read.csv('data/46-features.csv')
+all.features.affinity <- read.csv('data/affinity_clusters.csv')
+all.features.fuzzy <- read.csv('data/fanny_typicality.csv')
+raw.spectrograms <- read.csv('data/raw_spectrogram_umap_dimensions.csv')
 
 
 ## Create UMAP with affinity propagation clusters labeled
