@@ -30,7 +30,7 @@ summary(stable)
 ## Interate memb.exp (1.1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5) to find best solution
 k2u11 <- fanny(z_all.features, k = 2, memb.exp = 1.1)
 summary(k2u11)
-
+k2u11$membership
 
 # Export chosen element of output to CSV
 write.csv(k2u11$clustering, file = "K2U11_cluster.csv")

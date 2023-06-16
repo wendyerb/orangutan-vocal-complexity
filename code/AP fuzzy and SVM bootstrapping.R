@@ -1,5 +1,6 @@
-### Part 3: Affinity Propagation ###
+### Part 3: Bootstrapping number of training samples and number of features ###
 
+# Load packages
 library(ggpubr)
 library(multcomp)
 library(apcluster)
@@ -9,6 +10,7 @@ library(cluster)
 library(clValid)
 library(tidyverse)
 
+# Start time 10:04
 
 #### Set working directory
 #setwd('/Users/Wendy/github/orangutan-vocal-complexity/data')
@@ -25,13 +27,13 @@ all.features$Pulse.Type <- factor(all.features$Pulse.Type, levels = c("HU", "VO"
 # Create new variable for SVM that keeps pulse type column
 all.features.svm <- all.features
 
-# Affinity propagation clustering ---------------------------------------------------------------------
+# I. Affinity propagation clustering random samples ---------------------------------------------------------------------
 
 # Remove pulse type
 all.features <- subset(all.features, select=-c(Pulse.Type))
 
 N.samples <- c(100, 200, 300, 400, 500, 600, 700, 800, 900)
-N.randomization <- 25
+N.randomization <-25
 
 Affinity.rand.df <- data.frame()
 
@@ -77,18 +79,11 @@ Affinity.rand.df <- read.csv('data/Affinity.rand.df.csv')
 Affinity.rand.df$n.samples <- as.factor(Affinity.rand.df$n.samples)
 levels(Affinity.rand.df$n.samples) <- N.samples
 
-ggpubr::ggscatter(data=Affinity.rand.df,
-                  x='n.samples', y='n.clusters',position = position_jitter(0.00001))
-
-ggpubr::ggboxplot(data=Affinity.rand.df,
-                  x='n.samples', y='n.clusters',outlier.shape = NA)
-
 Affinity.rand.df$n.clusters <- as.factor(Affinity.rand.df$n.clusters)
-
 
 complete.affinity <- complete(Affinity.rand.df, n.samples, n.clusters, fill = list(count = 0))
 
-ggpubr::gghistogram(data=complete.affinity,
+RandomAffinity <- ggpubr::gghistogram(data=complete.affinity,
                   x='n.samples', group='n.clusters',
                   fill='n.clusters', stat="count",position="dodge")+
                   scale_x_discrete(drop = FALSE)+
@@ -98,7 +93,7 @@ ggpubr::gghistogram(data=complete.affinity,
 
 
 
-# Fuzzy ---------------------------------------------------------------------
+# II. Fuzzy random samples---------------------------------------------------------------------
 # Read in data
 all.features <- read.csv('data/46-features.csv')
 
@@ -108,9 +103,7 @@ all.features <- subset(all.features, select=-c(Pulse.Type))
 # Scale all features
 z_all.features<-scale(all.features, center = TRUE, scale = TRUE)
 
-
 N.samples <- c(100, 200, 300, 400, 500, 600, 700, 800, 900)
-N.randomization <- 25
 
 fuzzy.rand.df <- data.frame()
 
@@ -124,11 +117,10 @@ for(a in 1:length(N.samples)){
     
     ## Interate memb.exp (1.1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5) to find best solution
     
-       
     sil.coef.list <- list()
     for(c in 2:7){
-      Fclustoutput <- fclust::Fclust (X = all.features.sub, k =  c, type = "medoids", noise = TRUE)
-      silq0 <- cluster::silhouette(x = Fclustoutput$clus[,1],  dist = dist(all.features.sub))
+      Fclustoutput <-  fanny(all.features.sub, k = c, memb.exp = 1.1)
+      silq0 <- cluster::silhouette(x = Fclustoutput$clustering ,  dist = dist(all.features.sub))
       sil.coef.list[[c]] <- summary(silq0)$avg.width
     }
     
@@ -137,21 +129,20 @@ for(a in 1:length(N.samples)){
     max.sil <-  sil.coef.list[[(2:7) [sil.index]]]
     NClust <- (2:7) [sil.index]
     
-    Fclustoutput <- fclust::Fclust (X = all.features.sub, k =  NClust, type = "medoids", noise = TRUE)
+    Fclustoutput <- fanny(all.features.sub, k =  NClust, memb.exp = 1.1)
     
-    PulseHardAssignment <- Fclustoutput$clus[,1]
+    PulseHardAssignment <- Fclustoutput$clustering
     NPulseHardAssignment <- unique(PulseHardAssignment)
-    
     
    if(length(NPulseHardAssignment) >1){
     
      TypicalityList <- list()
-     for(c in 1:nrow( Fclustoutput$U)){
-            MaxMember <-   which.max(Fclustoutput$U[c,])
-            SecondMaxMember <-max(Fclustoutput$U[c,-MaxMember])
-            SecondMaxMember <-  which(Fclustoutput$U[c,]==SecondMaxMember)
+     for(c in 1:nrow( Fclustoutput$membership)){
+            MaxMember <-   which.max(Fclustoutput$membership[c,])
+            SecondMaxMember <-max(Fclustoutput$membership[c,-MaxMember])
+            SecondMaxMember <-  which(Fclustoutput$membership[c,]==SecondMaxMember)
             # Substract second from first
-           TypicalityList[[c]] <- Fclustoutput$U[c,MaxMember] - Fclustoutput$U[c,SecondMaxMember]
+           TypicalityList[[c]] <- Fclustoutput$membership[c,MaxMember] - Fclustoutput$membership[c,SecondMaxMember]
      }
     
      Typicality <- median(unlist(TypicalityList))
@@ -168,11 +159,11 @@ for(a in 1:length(N.samples)){
     
     colnames(Temp.row) <- c('n.clusters','sil.coef','n.samples','randomization','Typicality')
     fuzzy.rand.df <- rbind.data.frame(fuzzy.rand.df,Temp.row)
-    write.csv(fuzzy.rand.df,'data/fuzzy.rand.df.csv')  
+   write.csv(fuzzy.rand.df,'data/fuzzy.rand.df.csv')  
   }
 }
 
-fuzzy.rand.df <- subset(fuzzy.rand.df,n.samples!='NA')
+fuzzy.rand.df <- read.csv('data/fuzzy.rand.df.csv')
 
 fuzzy.rand.df$n.samples <- as.factor(fuzzy.rand.df$n.samples)
 levels(fuzzy.rand.df$n.samples) <- N.samples
@@ -181,50 +172,33 @@ fuzzy.rand.df$n.clusters <- as.factor(fuzzy.rand.df$n.clusters)
 
 complete.fuzzy <- complete(fuzzy.rand.df, n.samples, n.clusters, fill = list(count = 0))
 
-ggpubr::gghistogram(data=complete.fuzzy,
+RandomFuzzy <- ggpubr::gghistogram(data=complete.fuzzy,
                     x='n.samples', group='n.clusters',
                     fill='n.clusters', stat="count",position="dodge")+
   scale_x_discrete(drop = FALSE)+
   scale_fill_manual(values = matlab::jet.colors(5) )+
-  ylab('N iterations')+
+  ylab('N iterations')+xlab('N samples')+
   labs(fill='N clusters')
 
 # Membership coefficients correspond to the degree of being in a given cluster
-ggboxplot(data=fuzzy.rand.df, x='n.samples', y='Typicality')+
+RandomTypicality <- ggboxplot(data=fuzzy.rand.df, x='n.samples', y='Typicality')+
   ylab('Mean typicality')+ xlab('N samples')
 
-# SVM ---------------------------------------------------------------------
 
-N.samples.svm <- c(100, 200, 300, 400, 500, 600, 700, 800, 900)
-
+cowplot::plot_grid(RandomAffinity,RandomFuzzy,RandomTypicality,
+                   labels=c('A)', 'B)','C)'),label_x = 0.9)
+# III. SVM random samples---------------------------------------------------------------------
 
 SVM.rand.df <- data.frame()
 
-for(a in 1:length(N.samples.svm)){
-  for(b in 1:N.randomization.svm){
-    
-    Samples.vec <- sample( c(1:nrow(all.features.svm)), size = N.samples.svm[a], replace = FALSE)
+for(b in 1:N.randomization){
+for(a in 1:length(N.samples)){
+  
+    Samples.vec <- sample( c(1:nrow(all.features.svm)), size = N.samples[a], replace = FALSE)
     
     all.features.svm.sub <- all.features.svm[Samples.vec,]
     
-# 
-# tune.sig.method.1.all <-
-#   tune(
-#     svm,
-#     all.features.svm.sub[, 1:46],
-#     all.features.svm.sub$Pulse.Type,
-#     kernel = "sigmoid",
-#     ranges = list(
-#       cost = c(0.001, 0.01, 0.1, 1, 5, 10, 100),
-#       gamma = c(0.001, 0.01, 0.1, 0.5, 1.0, 2.0)
-#     )
-#   )
-# 
-# cost.sig.all <- tune.sig.method.1.all$best.parameters$cost
-# cost.sig.all ## 100
-# gamma.sig.all <-  tune.sig.method.1.all$best.parameters$gamma
-# gamma.sig.all ## 0.001
-
+    
 svm.sig.method.1.all <-
   svm(
     all.features.svm.sub[, 1:46],
@@ -242,34 +216,37 @@ print(Temp.row)
 
 colnames(Temp.row) <- c('svm.accuracy','n.samples','randomization')
 SVM.rand.df <- rbind.data.frame(SVM.rand.df,Temp.row)
+write.csv(SVM.rand.df,'data/SVM.rand.df.csv')  
   }
 }
 
+SVM.rand.df <- read.csv('data/SVM.rand.df.csv')
 SVM.rand.df$n.samples <- as.factor(SVM.rand.df$n.samples)
-levels(SVM.rand.df$n.samples) <- N.samples.svm
+levels(SVM.rand.df$n.samples) <- N.samples
 
-ggpubr::ggboxplot(data=SVM.rand.df,
-                  x='n.samples', y='svm.accuracy',outlier.shape = NA)+stat_compare_means(aes(label = after_stat(p.signif)),method = "t.test", ref.group = "900")
+RandomSVM <- ggpubr::ggboxplot(data=SVM.rand.df,
+                  x='n.samples', y='svm.accuracy',outlier.shape = NA)+ ylab('SVM accuracy')+ xlab('N samples')
 
+cowplot::plot_grid(RandomAffinity,RandomFuzzy,RandomTypicality,RandomSVM,
+                   labels=c('A)', 'B)','C)','D)'),label_x = 0.9)
+             
 
-
-# Randomly select features ---------------------------------------------------------------------
+# IV. Affinity and fuzzy randomly select features ---------------------------------------------------------------------
 ####Read in features 
 all.features <- read.csv('data/46-features.csv')
 
 #### Check distribution of pulse types
 table(all.features$Pulse.Type)
 
-####Make pulse type a factor
-all.features$Pulse.Type <- factor(all.features$Pulse.Type, levels = c("HU", "VO", "HR","LR", "IN", "SI"))
+# Remove pulse type
+all.features <- subset(all.features, select=-c(Pulse.Type))
 
-### Loop to randomize
-Affinity.feature.df <- data.frame()
+### Loop to randomize features
+CombinedRandomFeatures.df <- data.frame()
 
 N.features <- c(2,4,8,16,32,40)
-N.randomization.affinity <- 25
 
-for(b in 12:(N.randomization.affinity)){
+for(b in 1:(N.randomization)){
 for(a in 1:length(N.features)){   
  
   Samples.vec <- sample( c(1:ncol(all.features)), size = N.features[a], replace = FALSE)
@@ -298,23 +275,53 @@ for(a in 1:length(N.features)){
     
     n.clusters <- length(cluster.dfq0@exemplars)
     
-    Temp.row <- cbind.data.frame(n.clusters,sil.coef,a,b)
-    print(Temp.row)
+    Temp.row.affinity <- cbind.data.frame(n.clusters,sil.coef,a,b)
+    print(Temp.row.affinity)
   } else{
-    Temp.row <- cbind.data.frame(1,NA,a,b)
+    Temp.row.affinity <- cbind.data.frame(1,NA,a,b)
   }
   
-  colnames(Temp.row) <- c('n.clusters','sil.coef','n.samples','randomization')
-  Affinity.feature.df <-  rbind.data.frame(Affinity.feature.df,Temp.row)
+  colnames(Temp.row.affinity) <- c('n.clusters','sil.coef','n.samples','randomization')
   
+  sil.coef.list <- list()
+  for(c in 2:7){
+    Fclustoutput <- fanny(all.features.sub, k =  c, memb.exp = 1.1)
+    silq0 <- cluster::silhouette(x = Fclustoutput$clustering,  dist = dist(all.features.sub))
+    sil.coef.list[[c]] <- summary(silq0)$avg.width
+  }
+  
+  sil.index <- which.max(unlist(sil.coef.list)[-1])
+  
+  max.sil.fuzzy <-  sil.coef.list[[(2:7) [sil.index]]]
+  NClust <- (2:7) [sil.index]
+  
+  Fclustoutput <- fanny(all.features.sub, k =  NClust, memb.exp = 1.1)
+  
+  PulseHardAssignment <- Fclustoutput$clustering
+  NPulseHardAssignment <- length(unique(PulseHardAssignment))
+  
+  Temp.row.fuzzy <- cbind.data.frame(NPulseHardAssignment,max.sil.fuzzy,'fuzzy',a,b)
+  colnames(Temp.row.fuzzy) <- c('n.clusters','sil.coef','algorithm','N.features','randomization')
+  Temp.row.affinity <- cbind.data.frame(n.clusters,sil.coef,'affinity',a,b)
+  colnames(Temp.row.affinity) <- c('n.clusters','sil.coef','algorithm','N.features','randomization')
+  
+  CombinedRandomFeatures.row <- rbind.data.frame(Temp.row.affinity,Temp.row.fuzzy)
+  
+  CombinedRandomFeatures.df <-  rbind.data.frame(CombinedRandomFeatures.df,CombinedRandomFeatures.row)
+  write.csv(CombinedRandomFeatures.df,'data/CombinedRandomFeatures.df.csv')
 }
 }
 
+CombinedRandomFeatures.df <- read.csv('data/CombinedRandomFeatures.df.csv')
 
-Affinity.feature.df$n.features <- as.factor(Affinity.feature.df$n.samples)
-levels(Affinity.feature.df$n.features) <- N.features
+CombinedRandomFeatures.df$N.features <- as.factor(CombinedRandomFeatures.df$N.features)
 
-ggpubr::ggviolin(data=Affinity.feature.df,
-                  x='n.features', y='n.clusters')
+levels(CombinedRandomFeatures.df$N.features) <- N.features
+CombinedRandomFeatures.df$algorithm <- as.factor(CombinedRandomFeatures.df$algorithm)
+levels(CombinedRandomFeatures.df$algorithm) <- c('Affinity','Fuzzy')
+
+ggpubr::ggerrorplot(data=CombinedRandomFeatures.df,
+                  x='N.features', y='n.clusters',facet.by ='algorithm' )+
+                  ylab('N clusters')
 
 
