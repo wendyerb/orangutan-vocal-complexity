@@ -1,16 +1,82 @@
 ### Part 3: Bootstrapping number of training samples and number of features ###
 
 # Load packages
-library(ggpubr)
-library(multcomp)
-library(apcluster)
-library(tidyverse)
-library(e1071)
-library(cluster)
-library(clValid)
-library(tidyverse)
+library(ggpubr)    # For creating plots
+library(multcomp)  # For multiple comparisons
+library(apcluster) # For affinity propagation clustering
+library(tidyverse) # For data manipulation and visualization
+library(e1071)     # For support vector machine (SVM) classification
+library(cluster)   # For cluster analysis
+library(clValid)   # For cluster validation
 
-# Start time 10:04
+# Set number of samples to iterate over
+N.samples <- c(100, 200, 300, 400, 500, 600, 700, 800, 900)
+
+# Read in data sheet for affinity
+Affinity.rand.df <- read.csv('data/Affinity.rand.df.csv')
+
+# Convert 'n.samples' column to factor and assign levels
+Affinity.rand.df$n.samples <- as.factor(Affinity.rand.df$n.samples)
+levels(Affinity.rand.df$n.samples) <- N.samples
+
+# Convert 'n.clusters' column to factor
+Affinity.rand.df$n.clusters <- as.factor(Affinity.rand.df$n.clusters)
+
+# Add 0 so that all categories are shown
+complete.affinity <- complete(Affinity.rand.df, n.samples, n.clusters, fill = list(count = 0))
+
+# Create histogram plot for Affinity clustering
+RandomAffinity <- ggpubr::gghistogram(data=complete.affinity,
+                                      x='n.samples', group='n.clusters',
+                                      fill='n.clusters', stat="count",position="dodge")+
+  scale_x_discrete(drop = FALSE)+
+  scale_fill_manual(values = matlab::jet.colors(5) )+
+  ylab('N iterations')+ xlab('N samples')+
+  labs(fill='N clusters')
+
+# Read in data sheet for fuzzy clustering
+fuzzy.rand.df <- read.csv('data/fuzzy.rand.df.csv')
+
+# Convert 'n.samples' column to factor and assign levels
+fuzzy.rand.df$n.samples <- as.factor(fuzzy.rand.df$n.samples)
+levels(fuzzy.rand.df$n.samples) <- N.samples
+
+# Convert 'n.clusters' column to factor
+fuzzy.rand.df$n.clusters <- as.factor(fuzzy.rand.df$n.clusters)
+
+# Add 0 so that all categories are shown
+complete.fuzzy <- complete(fuzzy.rand.df, n.samples, n.clusters, fill = list(count = 0))
+
+# Create histogram plot for fuzzy clustering
+RandomFuzzy <- ggpubr::gghistogram(data=complete.fuzzy,
+                                   x='n.samples', group='n.clusters',
+                                   fill='n.clusters', stat="count",position="dodge")+
+  scale_x_discrete(drop = FALSE)+
+  scale_fill_manual(values = matlab::jet.colors(5) )+
+  ylab('N iterations')+xlab('N samples')+
+  labs(fill='N clusters')
+
+# Create boxplot for fuzzy clustering (mean typicality)
+RandomTypicality <- ggboxplot(data=fuzzy.rand.df, x='n.samples', y='Typicality', outlier.shape = NA)+
+  ylab('Mean typicality')+ xlab('N samples')+ylim(0.975,1)
+
+# Read in data sheet for SVM classification
+SVM.rand.df <- read.csv('data/SVM.rand.df.csv')
+
+# Convert 'n.samples' column to factor and assign levels
+SVM.rand.df$n.samples <- as.factor(SVM.rand.df$n.samples)
+levels(SVM.rand.df$n.samples) <- N.samples
+
+# Create boxplot for SVM accuracy
+RandomSVM <- ggpubr::ggboxplot(data=SVM.rand.df,
+                               x='n.samples', y='svm.accuracy',outlier.shape = NA)+ ylab('SVM accuracy')+ xlab('N samples')
+
+# Arrange all the plots in a grid
+cowplot::plot_grid(RandomAffinity,RandomFuzzy,RandomTypicality,RandomSVM,
+                   labels=c('A)', 'B)','C)','D)'),label_x = 0.9)
+
+
+# Data preparation for bootstrapping --------------------------------------
 
 #### Set working directory
 #setwd('/Users/Wendy/github/orangutan-vocal-complexity/data')
@@ -181,8 +247,8 @@ RandomFuzzy <- ggpubr::gghistogram(data=complete.fuzzy,
   labs(fill='N clusters')
 
 # Membership coefficients correspond to the degree of being in a given cluster
-RandomTypicality <- ggboxplot(data=fuzzy.rand.df, x='n.samples', y='Typicality')+
-  ylab('Mean typicality')+ xlab('N samples')
+RandomTypicality <- ggboxplot(data=fuzzy.rand.df, x='n.samples', y='Typicality', outlier.shape = NA)+
+  ylab('Mean typicality')+ xlab('N samples')+ylim(0.975,1)
 
 
 cowplot::plot_grid(RandomAffinity,RandomFuzzy,RandomTypicality,
@@ -322,6 +388,7 @@ levels(CombinedRandomFeatures.df$algorithm) <- c('Affinity','Fuzzy')
 
 ggpubr::ggerrorplot(data=CombinedRandomFeatures.df,
                   x='N.features', y='n.clusters',facet.by ='algorithm' )+
-                  ylab('N clusters')
+                  xlab('N features')+ ylab('N clusters')
+
 
 
