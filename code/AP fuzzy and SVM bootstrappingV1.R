@@ -13,7 +13,7 @@ library(clValid)   # For cluster validation
 N.samples <- c(100, 200, 300, 400, 500, 600, 700, 800, 900)
 
 # Read in data sheet for affinity
-Affinity.rand.df <- read.csv('data/Affinity.rand.df.csv')
+Affinity.rand.df <- read.csv('data_V1/Affinity.rand.df.csv')
 
 # Convert 'n.samples' column to factor and assign levels
 Affinity.rand.df$n.samples <- as.factor(Affinity.rand.df$n.samples)
@@ -35,7 +35,7 @@ RandomAffinity <- ggpubr::gghistogram(data=complete.affinity,
   labs(fill='N clusters')
 
 # Read in data sheet for fuzzy clustering
-fuzzy.rand.df <- read.csv('data/fuzzy.rand.df.csv')
+fuzzy.rand.df <- read.csv('data_V1/fuzzy.rand.df.csv')
 
 # Convert 'n.samples' column to factor and assign levels
 fuzzy.rand.df$n.samples <- as.factor(fuzzy.rand.df$n.samples)
@@ -61,7 +61,7 @@ RandomTypicality <- ggerrorplot(data=fuzzy.rand.df, x='n.samples', y='Typicality
   ylab('Mean typicality')+ xlab('N samples')+ylim(0.975,1)
 
 # Read in data sheet for SVM classification
-SVM.rand.df <- read.csv('data/SVM.rand.df.csv')
+SVM.rand.df <- read.csv('data_V1/SVM.rand.df.csv')
 
 # Convert 'n.samples' column to factor and assign levels
 SVM.rand.df$n.samples <- as.factor(SVM.rand.df$n.samples)
@@ -76,7 +76,7 @@ cowplot::plot_grid(RandomAffinity,RandomFuzzy,RandomTypicality,RandomSVM,
                    labels=c('A)', 'B)','C)','D)'),label_x = 0.9)
 
 
-CombinedRandomFeatures.df <- read.csv('data/CombinedRandomFeatures.df.csv')
+CombinedRandomFeatures.df <- read.csv('data_V1/CombinedRandomFeatures.df.csv')
 
 N.features <- c(2,4,8,16,32,40)
 
@@ -107,7 +107,7 @@ ggpubr::gghistogram(data=CombinedRandomFeatures.df,
 #setwd('/Users/Wendy/github/orangutan-vocal-complexity/data')
 
 ####Read in features 
-all.features <- read.csv('data/46-features.csv')
+all.features <- read.csv('data_V1/46-features.csv')
 
 #### Check distribution of pulse types
 table(all.features$Pulse.Type)
@@ -162,11 +162,11 @@ print(Temp.row)
 
 colnames(Temp.row) <- c('n.clusters','sil.coef','n.samples','randomization')
 Affinity.rand.df <- rbind.data.frame(Affinity.rand.df,Temp.row)
-write.csv(Affinity.rand.df,'data/Affinity.rand.df.csv')  
+write.csv(Affinity.rand.df,'data_V1/Affinity.rand.df.csv')  
 }
 }
 
-Affinity.rand.df <- read.csv('data/Affinity.rand.df.csv')
+Affinity.rand.df <- read.csv('data_V1/Affinity.rand.df.csv')
 Affinity.rand.df$n.samples <- as.factor(Affinity.rand.df$n.samples)
 levels(Affinity.rand.df$n.samples) <- N.samples
 
@@ -186,7 +186,7 @@ RandomAffinity <- ggpubr::gghistogram(data=complete.affinity,
 
 # II. Fuzzy random samples---------------------------------------------------------------------
 # Read in data
-all.features <- read.csv('data/46-features.csv')
+all.features <- read.csv('data_V1/46-features.csv')
 
 # Remove pulse type
 all.features <- subset(all.features, select=-c(Pulse.Type))
@@ -250,11 +250,11 @@ for(a in 1:length(N.samples)){
     
     colnames(Temp.row) <- c('n.clusters','sil.coef','n.samples','randomization','Typicality')
     fuzzy.rand.df <- rbind.data.frame(fuzzy.rand.df,Temp.row)
-   write.csv(fuzzy.rand.df,'data/fuzzy.rand.df.csv')  
+   write.csv(fuzzy.rand.df,'data_V1/fuzzy.rand.df.csv')  
   }
 }
 
-fuzzy.rand.df <- read.csv('data/fuzzy.rand.df.csv')
+fuzzy.rand.df <- read.csv('data_V1/fuzzy.rand.df.csv')
 
 fuzzy.rand.df$n.samples <- as.factor(fuzzy.rand.df$n.samples)
 levels(fuzzy.rand.df$n.samples) <- N.samples
@@ -307,11 +307,11 @@ print(Temp.row)
 
 colnames(Temp.row) <- c('svm.accuracy','n.samples','randomization')
 SVM.rand.df <- rbind.data.frame(SVM.rand.df,Temp.row)
-write.csv(SVM.rand.df,'data/SVM.rand.df.csv')  
+write.csv(SVM.rand.df,'data_V1/SVM.rand.df.csv')  
   }
 }
 
-SVM.rand.df <- read.csv('data/SVM.rand.df.csv')
+SVM.rand.df <- read.csv('data_V1/SVM.rand.df.csv')
 SVM.rand.df$n.samples <- as.factor(SVM.rand.df$n.samples)
 levels(SVM.rand.df$n.samples) <- N.samples
 
@@ -324,7 +324,7 @@ cowplot::plot_grid(RandomAffinity,RandomFuzzy,RandomTypicality,RandomSVM,
 
 # IV. Affinity and fuzzy randomly select features ---------------------------------------------------------------------
 ####Read in features 
-all.features <- read.csv('data/46-features.csv')
+all.features <- read.csv('data_V1/46-features.csv')
 
 #### Check distribution of pulse types
 table(all.features$Pulse.Type)
@@ -399,11 +399,11 @@ for(a in 1:length(N.features)){
   CombinedRandomFeatures.row <- rbind.data.frame(Temp.row.affinity,Temp.row.fuzzy)
   
   CombinedRandomFeatures.df <-  rbind.data.frame(CombinedRandomFeatures.df,CombinedRandomFeatures.row)
-  write.csv(CombinedRandomFeatures.df,'data/CombinedRandomFeatures.df.csv')
+  write.csv(CombinedRandomFeatures.df,'data_V1/CombinedRandomFeatures.df.csv')
 }
 }
 
-CombinedRandomFeatures.df <- read.csv('data/CombinedRandomFeatures.df.csv')
+CombinedRandomFeatures.df <- read.csv('data_V1/CombinedRandomFeatures.df.csv')
 
 CombinedRandomFeatures.df$N.features <- as.factor(CombinedRandomFeatures.df$N.features)
 
