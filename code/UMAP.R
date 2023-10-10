@@ -2,16 +2,21 @@
 library(umap)
 library(tidyverse)
 library(factoextra)
+library(ggpubr)    # For creating plots
+
 
 #### Set working directory
 #setwd('/Users/Wendy/github/orangutan-vocal-complexity/data')
 
 ####Read in features 
-all.features <- read.csv('data/46-features.csv')
-all.features.affinity <- read.csv('data/affinity_clusters.csv')
-all.features.fuzzy <- read.csv('data/fanny_typicality.csv')
-raw.spectrograms <- read.csv('data/raw_spectrogram_umap_dimensions.csv')
+all.features <- read.csv('data_V1/46-features.csv')
+all.features.affinity <- read.csv('data_V1/affinity_clusters.csv')
+all.features.fuzzy <- read.csv('data_V1/fanny_typicality.csv')
+raw.spectrograms <- read.csv('data_V1/raw_spectrogram_umap_dimensions.csv')
 
+# Color blind palette with black:
+cbPalette <- c("#762a83", "#af8dc3", "#e7d4e8", "#d9f0d3", "#7fbf7b", "#1b7837")
+cbPalette1 <- c("#d73027", "#fc8d59", "#fee090", "#e0f3f8", "#91bfdb", "#4575b4")
 
 ## Create UMAP with affinity propagation clusters labeled
 OrangPulse.umap <- 
@@ -34,7 +39,7 @@ myplot.for.OrangPulseAffinity <-
     colour = Cluster
   )) +
   geom_point(size = 1.5) +
-  theme_classic() + ggtitle('Affinity propagation') + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
+  theme_classic() + scale_colour_manual(values = cbPalette) + ggtitle('Affinity propagation') + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
   
 
 myplot.for.OrangPulseAffinity
@@ -57,7 +62,7 @@ myplot.for.OrangPulseFuzzy <-
     alpha = Typical
   )) +
   geom_point(size = 1.5) +
-  theme_classic() + ggtitle('Fuzzy cluster') + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + labs(fill = "Cluster")
+  theme_classic() + scale_colour_manual(values = cbPalette) + ggtitle('Fuzzy cluster') + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + labs(fill = "Cluster")
 
 myplot.for.OrangPulseFuzzy
 
@@ -79,7 +84,7 @@ myplot.for.OrangPulseHumanID <-
     colour = Pulse
   )) +
   geom_point(size = 1.5) +
-  theme_classic() + ggtitle('Audio-visual: feature set') + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) 
+  theme_classic() + scale_colour_manual(values = cbPalette) + ggtitle('Audio-visual: feature set') + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) 
 
 myplot.for.OrangPulseHumanID
 
@@ -93,7 +98,7 @@ myplot.for.OrangPulseSpectrograms <-
     colour = Pulse
   )) +
   geom_point(size = 1.5) +
-  theme_classic() + ggtitle('Audio-visual: raw spectrogram') + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
+  theme_classic() + scale_colour_manual(values = cbPalette) + ggtitle('Audio-visual: raw spectrogram') + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
 
 myplot.for.OrangPulseSpectrograms
 

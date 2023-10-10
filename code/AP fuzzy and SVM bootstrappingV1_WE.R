@@ -25,17 +25,25 @@ Affinity.rand.df$n.clusters <- as.factor(Affinity.rand.df$n.clusters)
 # Add 0 so that all categories are shown
 complete.affinity <- complete(Affinity.rand.df, n.samples, n.clusters, fill = list(count = 0))
 
+# The palette with black:
+cbPalette <- c("#762a83", "#af8dc3", "#e7d4e8", "#d9f0d3", "#7fbf7b", "#1b7837")
+cbPalette7 <- c("#762a83", "#af8dc3", "#e7d4e8", "#f7f7f7", "#d9f0d3", "#7fbf7b", "#1b7837")
+
+cbPalette2 <- c("#af8dc3", "#7fbf7b")
+cbPalette4 <- c("#762a83", "#e7d4e8", "#d9f0d3", "#1b7837")
+cbPalette1 <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
 # Create histogram plot for Affinity clustering
 RandomAffinity <- ggpubr::gghistogram(data=complete.affinity,
                                       x='n.samples', group='n.clusters',
                                       fill='n.clusters', stat="count",position="dodge")+
   scale_x_discrete(drop = FALSE)+
-  scale_fill_manual(values = matlab::jet.colors(5) )+
+  scale_fill_manual(values = cbPalette4)+
   ylab('N iterations')+ xlab('N observations')+
   labs(fill='N clusters')
 
 # Read in data sheet for fuzzy clustering
-fuzzy.rand.df <- read.csv('data_V1/fuzzy.rand.df.csv')
+fuzzy.rand.df <- read.csv('fuzzy.rand.df.csv')
 
 # Convert 'n.samples' column to factor and assign levels
 fuzzy.rand.df$n.samples <- as.factor(fuzzy.rand.df$n.samples)
@@ -47,18 +55,20 @@ fuzzy.rand.df$n.clusters <- as.factor(fuzzy.rand.df$n.clusters)
 # Add 0 so that all categories are shown
 complete.fuzzy <- complete(fuzzy.rand.df, n.samples, n.clusters, fill = list(count = 0))
 
+
+
 # Create histogram plot for fuzzy clustering
 RandomFuzzy <- ggpubr::gghistogram(data=complete.fuzzy,
                                    x='n.samples', group='n.clusters',
                                    fill='n.clusters', stat="count",position="dodge")+
   scale_x_discrete(drop = FALSE)+
-  scale_fill_manual(values = matlab::jet.colors(5) )+
-  ylab('N iterations')+xlab('N samples')+
+  scale_fill_manual(values = cbPalette4)+
+  ylab('N iterations')+xlab('N observations')+
   labs(fill='N clusters')
 
 # Create boxplot for fuzzy clustering (mean typicality)
 RandomTypicality <- ggerrorplot(data=fuzzy.rand.df, x='n.samples', y='Typicality', outlier.shape = NA)+
-  ylab('Mean typicality')+ xlab('N observations')+ylim(0.975,1)
+  ylab('Mean typicality coefficient')+ xlab('N observations')+ylim(0.995,1)
 
 # Read in data sheet for SVM classification
 SVM.rand.df <- read.csv('data_V1/SVM.rand.df.csv')
@@ -69,14 +79,15 @@ levels(SVM.rand.df$n.samples) <- N.samples
 
 # Create boxplot for SVM accuracy
 RandomSVM <- ggpubr::ggerrorplot(data=SVM.rand.df,
-                               x='n.samples', y='svm.accuracy',outlier.shape = NA)+ ylab('SVM accuracy')+ xlab('N observations')
+                               x='n.samples', y='svm.accuracy',outlier.shape = NA)+ ylab('SVM accuracy (%)')+ xlab('N observations')
 
 # Arrange all the plots in a grid
 cowplot::plot_grid(RandomAffinity,RandomFuzzy,RandomTypicality,RandomSVM,
-                   labels=c('A)', 'B)','C)','D)'),label_x = 0.9)
+                   labels=c('a)', 'b)','c)','d)'),label_x = 0.9)
 
 
-CombinedRandomFeatures.df <- read.csv('data_V1/CombinedRandomFeatures.df.csv')
+## Figure S4
+CombinedRandomFeatures.df <- read.csv('CombinedRandomFeatures.df.csv')
 
 N.features <- c(2,4,8,16,32,40)
 
@@ -84,11 +95,11 @@ CombinedRandomFeatures.df$N.features <- as.factor(CombinedRandomFeatures.df$N.fe
 
 levels(CombinedRandomFeatures.df$N.features) <- N.features
 CombinedRandomFeatures.df$algorithm <- as.factor(CombinedRandomFeatures.df$algorithm)
-levels(CombinedRandomFeatures.df$algorithm) <- c('Affinity','Fuzzy')
+levels(CombinedRandomFeatures.df$algorithm) <- c('Affinity Propagation','Fuzzy Clustering')
 
-ggpubr::ggerrorplot(data=CombinedRandomFeatures.df,
-                  x='N.features', y='n.clusters',facet.by ='algorithm' )+
-  xlab('N features')+ ylab('N clusters')
+##ggpubr::ggerrorplot(data=CombinedRandomFeatures.df,
+  ##                x='N.features', y='n.clusters',facet.by ='algorithm' )+
+  ##xlab('N features')+ ylab('N clusters')
 
 CombinedRandomFeatures.df$n.clusters <- as.factor(CombinedRandomFeatures.df$n.clusters)
 
@@ -97,7 +108,7 @@ ggpubr::gghistogram(data=CombinedRandomFeatures.df,
                     fill='n.clusters', stat="count",position="dodge",
                     facet.by = 'algorithm',preserve = "single")+
   scale_x_discrete(drop = FALSE)+
-  scale_fill_manual(values = matlab::jet.colors(9) )+
+  scale_fill_manual(values = cbPalette7)+
   ylab('N iterations')+xlab('N features')+
   labs(fill='N clusters')
 
@@ -178,7 +189,7 @@ RandomAffinity <- ggpubr::gghistogram(data=complete.affinity,
                   x='n.samples', group='n.clusters',
                   fill='n.clusters', stat="count",position="dodge")+
                   scale_x_discrete(drop = FALSE)+
-                  scale_fill_manual(values = matlab::jet.colors(5) )+
+                  scale_fill_manual(values = cbPalette)+
   ylab('N iterations')+ xlab('N samples')+
   labs(fill='N clusters')
 
@@ -267,7 +278,7 @@ RandomFuzzy <- ggpubr::gghistogram(data=complete.fuzzy,
                     x='n.samples', group='n.clusters',
                     fill='n.clusters', stat="count",position="dodge")+
   scale_x_discrete(drop = FALSE)+
-  scale_fill_manual(values = matlab::jet.colors(5) )+
+  scale_fill_manual(values = cbPalette)+
   ylab('N iterations')+xlab('N samples')+
   labs(fill='N clusters')
 
