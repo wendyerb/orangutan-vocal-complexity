@@ -6,7 +6,7 @@ library(apcluster)
 library(tidyverse)
 
 #### Set working directory
-setwd('/Users/Wendy/github/orangutan-vocal-complexity/data')
+setwd('/Users/Wendy/github/orangutan-vocal-complexity/data_V1')
 
 ####Read in features 
 all.features <- read.csv('46-features.csv')
@@ -121,6 +121,9 @@ ggboxplot(data=all.features.affinity,x='Pulse.Type',y='Center.Freq.Hz')
 
 
 ### Affinity-Pulse Type Plots
+
+cbPalette <- c("#762a83", "#af8dc3", "#e7d4e8", "#d9f0d3", "#7fbf7b", "#1b7837")
+
 Affinity <- all.features.affinity %>% 
   ggplot(aes(x=affinity.id, fill = Pulse.Type)) +
   theme_classic() +
@@ -129,7 +132,7 @@ Affinity <- all.features.affinity %>%
   theme(legend.text = element_text(size = 14)) +
   theme(legend.title = element_text(size = 20)) +
   theme(title = element_text(size = 20)) +
-  geom_bar() +
+  geom_bar() + scale_fill_manual(values = cbPalette) +
   labs(x = "Affinity cluster", y = "Count", fill = "Pulse")
 Affinity
 

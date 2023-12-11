@@ -9,7 +9,7 @@ library(MASS)
 library(e1071)
 
 ####Read in features 
-all.features <- read.csv('data/46-features.csv')
+all.features <- read.csv('46-features.csv')
 
 ####Make pulse type a factor
 all.features$Pulse.Type <- as.factor(all.features$Pulse.Type) 
