@@ -101,6 +101,48 @@ ggpubr::gghistogram(data=CombinedRandomFeatures.df,
   ylab('N iterations')+xlab('N features')+
   labs(fill='N clusters')
 
+# Create confusion matrix for publication
+# Create a random 60/40 split
+Samples.vec <- sample( c(1:nrow(all.features.svm)), size = nrow(all.features.svm)*0.6, replace = FALSE)
+# The 'Samples.vec' vector is created by randomly sampling 60% of the row indices of the 'all.features.svm' dataset without replacement.
+# This split is often used for training and testing machine learning models.
+
+all.features.svm.sub <- all.features.svm[Samples.vec,]
+all.features.svm.test <- all.features.svm[-Samples.vec,]
+# 'all.features.svm.sub' contains the 60% of data points selected for training, and 'all.features.svm.test' contains the remaining 40% for testing.
+
+svm.sig.method.1.all <-
+  svm(
+    all.features.svm.sub[, 1:46],  # Selecting columns 1 to 46 as features for training
+    all.features.svm.sub$Pulse.Type,  # The target variable for training
+    kernel = "sigmoid",  # Using the sigmoid kernel for SVM
+    # cost = cost.sig.all,  # Optional hyperparameter (not specified in this code)
+    # gamma = gamma.sig.all,  # Optional hyperparameter (not specified in this code)
+    cross = nrow(all.features.svm.sub) # Setting the 'cross' parameter for cross-validation
+    # This is not used for the final model but indicates leave-one-out cross-validation, which means one data point is left out as a test set in each iteration.
+  )
+
+# Predicting the target variable using the SVM model on the test data.
+SVMPredictions <- predict(svm.sig.method.1.all,all.features.svm.test[, 1:46])
+
+# Generating a confusion matrix to evaluate the performance of the SVM model on the test data.
+ConfMatrix <-caret::confusionMatrix(all.features.svm.test$Pulse.Type,SVMPredictions,'everything')
+
+# Calculating the proportion of correct predictions for each class in the confusion matrix.
+ProportionCorrect <- diag(ConfMatrix$table)/rowSums(ConfMatrix$table)
+
+#Creating a data frame from the confusion matrix and adding a column with the percentage of correct predictions.
+ConfMatrixDF <- as.data.frame(as.matrix(ConfMatrix))
+
+# Round the proportion values
+ConfMatrixDF$Correct <- round(ProportionCorrect,2)
+
+# Print the confusion matrix and saving it as a CSV file.
+ConfMatrixDF
+
+write.csv(ConfMatrixDF,'ConfusionMatrix.csv')
+
+
 # Data preparation for bootstrapping --------------------------------------
 
 #### Set working directory
