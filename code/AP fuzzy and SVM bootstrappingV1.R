@@ -140,7 +140,7 @@ ConfMatrixDF$Correct <- round(ProportionCorrect,2)
 # Print the confusion matrix and saving it as a CSV file.
 ConfMatrixDF
 
-write.csv(ConfMatrixDF,'ConfusionMatrix.csv')
+write.csv(ConfMatrixDF,'data_V1/ConfusionMatrix.csv')
 
 
 # Data preparation for bootstrapping --------------------------------------
