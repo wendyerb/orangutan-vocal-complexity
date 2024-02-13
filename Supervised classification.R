@@ -1,7 +1,5 @@
 # Create confusion matrix for publication
 
-# NOTE: Do randomization over 30 samples for each class, and do just accuracy
-
 # Load necessary libraries
 library(caret)
 library(MASS)
@@ -210,7 +208,7 @@ cbind.data.frame(PulseType,MeanSD)
 # 6        VO 0.51 ± 0.18
 
 
-# Recursive feature elimination -------------------------------------------
+# Part 3. Recursive feature elimination -------------------------------------------
 
 source("code/msvmRFE.R")
 
