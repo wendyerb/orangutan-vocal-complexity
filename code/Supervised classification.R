@@ -137,7 +137,7 @@ for(a in 1:20){
   all.features.sub <- CombinedBalancedPulseTypeDF[Samples.vec,]
   all.features.test <- CombinedBalancedPulseTypeDF[-Samples.vec,]
   
-  # SVM model training using polynomial kernel
+  # SVM model training using best kernel
   svm.sig.method.1.all <-
     svm(
       all.features.sub[, 1:46],  # Selecting columns 1 to 46 as features for training
