@@ -106,6 +106,7 @@ AggregatePerform <- aggregate(as.numeric(ConfMatrixDFlist$Sum),
           list(ConfMatrixDFlist$kernel), FUN=mean) 
 
 # Which is the best performing kernel?
+# Some variation based on randomization but 'linear' seems to be consistently the best
 AggregatePerform$Group.1[which.max(AggregatePerform$x)]
 
 # Part 2. Calculate accuracy over 20 iterations -------------------------------------------------------------------------
@@ -176,7 +177,7 @@ for(a in 1:20){
   ConfMatrixsvmDF <- rbind.data.frame(ConfMatrixsvmDF ,Values)
 }
 
-# Calculate mean balanced accuracy for each label
+# Calculate mean accuracy for each label
 AggregatePerformSVMean <- aggregate(as.numeric(ConfMatrixsvmDF$`Proportion Correct`), 
                                     list(ConfMatrixsvmDF$Labels), FUN=mean) 
 
@@ -213,22 +214,15 @@ cbind.data.frame(PulseType,MeanSD)
 source("code/msvmRFE.R")
 
 ##### The first column needs to include class labels
-all.features.temp <- all.features[,-c(47)]
+all.features.temp <- all.features[,c(47,1:46)]
 
 ##### We want k=10 for the k-fold cross validation as the “multiple” part of mSVM-RFE.
-svm.rfe.output <- svmRFE(all.features.rfe, k = 10, halve.above = 100)
+svm.rfe.output <- svmRFE(all.features.temp, k = 10, halve.above = 100)
 str(svm.rfe.output) 
 
 ##### Reorder the data so highest ranked feature is first
 new.svm.rfe <-
   all.features[, 1:ncol(all.features)][, dput(svm.rfe.output)]
-
-
-Pulse.Type <- all.features$Pulse.Type
-
-new.svm.rfe <- cbind.data.frame(Pulse.Type,new.svm.rfe)
-
-str(new.svm.rfe)
 
 ##### Create a list to store cross-validation accuracies
 accuracy.list <- list()
@@ -261,13 +255,8 @@ max.feature <- which.max(unlist(accuracy.list)) + 1
 ##### Subset the highest ranked variables which yield the highest accuracy
 svm.rfe.updated <- new.svm.rfe[,1:max.feature]
 
+# Check column names
 colnames(svm.rfe.updated)
-
-##### Combine class labels with new subset of features into a data frame for analysis
-svm.rfe.for.classification <-
-  cbind.data.frame(all.features$Pulse.Type, svm.rfe.updated)
-
-colnames(svm.rfe.for.classification)[1] <- "Pulse.Type"
 
 ##### Combine class labels with new subset of features into a data frame for analysis
 svm.rfe.for.classification <-
@@ -278,12 +267,11 @@ colnames(svm.rfe.for.classification)[1] <- "Pulse.Type"
 ##### Assess how well the leave one out cross validation did
 svm.sig.method.1.all <-
   svm(
-    new.svm.rfe[,2:j],  # Selecting columns 1 to 46 as features for training
-    new.svm.rfe$Pulse.Type,  # The target variable for training
+    svm.rfe.for.classification[,-c(1)],  # Selecting columns 1 to 46 as features for training
+    svm.rfe.for.classification$Pulse.Type,  # The target variable for training
     kernel = 'linear',  # Using the polynomial kernel for SVM
-    cross = nrow(all.features.sub) # Setting the 'cross' parameter for cross-validation
-    # This is not used for the final model but indicates leave-one-out cross-validation, which means one data point is left out as a test set in each iteration.
-  )
+    cross = nrow(svm.rfe.for.classification) # Setting the 'cross' parameter for cross-validation
+   )
 
 
 ##### total percent correct
