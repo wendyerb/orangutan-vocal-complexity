@@ -191,41 +191,7 @@ for(b in 1:N.randomization){
 }
 
 
-# Part 5. SVM random samples---------------------------------------------------------------------
-
-SVM.rand.df <- data.frame()
-
-for(b in 1:N.randomization){
-  for(a in 1:length(N.samples)){
-    
-    Samples.vec <- sample( c(1:nrow(all.features.svm)), size = N.samples[a], replace = FALSE)
-    
-    all.features.svm.sub <- all.features.svm[Samples.vec,]
-    
-    
-    svm.sig.method.1.all <-
-      svm(
-        all.features.svm.sub[, 1:46],
-        all.features.svm.sub$Pulse.Type,
-        kernel = "linear",
-        # cost = cost.sig.all,
-        # gamma = gamma.sig.all,
-        cross = nrow(all.features.svm.sub) # When cross = number of observations this indicates leave-one-out cross-validation
-      )
-    
-    svm.accuracy <- svm.sig.method.1.all$tot.accuracy ## 64.76283 DJC: 74.44337
-    
-    Temp.row <- cbind.data.frame(svm.accuracy,a,b)
-    print(Temp.row)
-    
-    colnames(Temp.row) <- c('svm.accuracy','n.samples','randomization')
-    SVM.rand.df <- rbind.data.frame(SVM.rand.df,Temp.row)
-    #write.csv(SVM.rand.df,'data_V1/SVM.rand.df.csv')  
-  }
-}
-
-
-# Part 6. Affinity and fuzzy randomly select features ---------------------------------------------------------------------
+# Part 5. Affinity and fuzzy randomly select features ---------------------------------------------------------------------
 ####Read in features 
 all.features <- read.csv('data_V1/46-features.csv')
 
@@ -308,7 +274,7 @@ for(b in 1:(N.randomization)){
 
 
 
-# Part 7. Balanced data across pulse types ----------------------------------------------------------------
+# Part 6. Balanced data across pulse types ----------------------------------------------------------------
 
 ####Read in features 
 all.features <- read.csv('data_V1/46-features.csv')
