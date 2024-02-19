@@ -37,7 +37,7 @@ write.csv(k2u11$clustering, file = "K2U11_cluster.csv")
 
 
 ## Read in file with typicality coefficients
-Typicality <- read.csv('fanny_typicality.csv')
+Typicality <- read.csv('data_V1/fanny_typicality.csv')
 str(Typicality)
 
 ## Separate data frames for typical and atypical calls
