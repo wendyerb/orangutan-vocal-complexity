@@ -277,3 +277,101 @@ svm.sig.method.1.all <-
 ##### total percent correct
 percent <- svm.sig.method.1.all$tot.accuracy
 percent
+
+
+# Part 4. Confusion matrix ------------------------------------------------
+
+####Read in features 
+all.features <- read.csv('data_V1/46-features.csv')
+
+#### Check distribution of pulse types
+table(all.features$Pulse.Type)
+
+####Make pulse type a factor
+all.features$Pulse.Type <- factor(all.features$Pulse.Type, levels = c("HU", "VO", "HR","LR", "IN", "SI"))
+
+# Create new variable for SVM that keeps pulse type column
+all.features.svm <- all.features
+
+
+    Samples.vec <- sample( c(1:nrow(all.features)), size = 620, replace = FALSE)
+    
+    all.features.sub <- all.features[Samples.vec,]
+    all.features.test <- all.features[-Samples.vec,]
+    
+    # SVM
+    svm.sig.method.1.all <-
+      e1071::svm(
+        all.features.sub[, 1:46],  # Selecting columns 1 to 46 as features for training
+        all.features.sub$Pulse.Type,  # The target variable for training
+        kernel = 'linear',  # Using the sigmoid kernel for SVM
+        cross = nrow(all.features.sub) # Setting the 'cross' parameter for cross-validation
+        # This is not used for the final model but indicates leave-one-out cross-validation, which means one data point is left out as a test set in each iteration.
+      )
+    
+    # Predicting the target variable using the SVM model on the test data.
+    SVMPredictions <- predict(svm.sig.method.1.all,all.features.test[, 1:46])
+    
+    # Generating a confusion matrix to evaluate the performance of the SVM model on the test data.
+    ConfMatrix <-caret::confusionMatrix(all.features.test$Pulse.Type,SVMPredictions,'everything')
+    
+    # Calculating the proportion of correct predictions for each class in the confusion matrix.
+    ProportionCorrect <- diag(ConfMatrix$table)/rowSums(ConfMatrix$table)
+    
+    #Creating a data frame from the confusion matrix and adding a column with the percentage of correct predictions.
+    ConfMatrixDF <- as.data.frame(as.matrix(ConfMatrix))
+    
+    # Round the proportion values
+    ConfMatrixDF$Correct <- round(ProportionCorrect,2)
+    
+    # Print the confusion matrix and saving it as a CSV file.
+    print(ConfMatrixDF)
+
+    # Save the output
+    write.csv(ConfMatrixDF,'data_V1/ConfusionMatrix.csv')
+
+# Part 5. SVM random samples---------------------------------------------------------------------
+
+# Set number of samples to iterate over
+N.samples <- c(100, 200, 300, 400, 500, 600, 700, 800, 900)
+
+N.randomization <-25
+
+SVM.rand.df <- data.frame()
+
+for(b in 1:N.randomization){
+  for(a in 1:length(N.samples)){
+    
+    Samples.vec <- sample( c(1:nrow(all.features.svm)), size = N.samples[a], replace = FALSE)
+    
+    all.features.svm.sub <- all.features.svm[Samples.vec,]
+    
+    svm.sig.method.1.all <-
+      svm(
+        all.features.svm.sub[, 1:46],
+        all.features.svm.sub$Pulse.Type,
+        kernel = "linear",
+        cross = nrow(all.features.svm.sub) # When cross = number of observations this indicates leave-one-out cross-validation
+      )
+    
+    svm.accuracy <- svm.sig.method.1.all$tot.accuracy ## 64.76283 DJC: 74.44337
+    
+    Temp.row <- cbind.data.frame(svm.accuracy,a,b)
+    print(Temp.row)
+    
+    colnames(Temp.row) <- c('svm.accuracy','n.samples','randomization')
+    SVM.rand.df <- rbind.data.frame(SVM.rand.df,Temp.row)
+    write.csv(SVM.rand.df,'data_V1/SVM.rand.df.csv')  
+  }
+}
+
+SVM.rand.df <- read.csv('data_V1/SVM.rand.df.csv')
+SVM.rand.df$n.samples <- as.factor(SVM.rand.df$n.samples)
+levels(SVM.rand.df$n.samples) <- N.samples
+
+RandomSVM <- ggpubr::ggboxplot(data=SVM.rand.df,
+                               x='n.samples', y='svm.accuracy',outlier.shape = NA)+ ylab('SVM accuracy')+ xlab('N samples')
+
+cowplot::plot_grid(RandomAffinity,RandomFuzzy,RandomTypicality,RandomSVM,
+                   labels=c('A)', 'B)','C)','D)'),label_x = 0.9)
+
