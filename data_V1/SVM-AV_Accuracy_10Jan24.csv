@@ -1,0 +1,13 @@
+﻿Pulse.Type,perc.accuracy,Method
+HU,10,SVM
+VO,2,SVM
+HR,71,SVM
+LR,50,SVM
+IN,12,SVM
+SI,92,SVM
+HU,94,AV
+VO,30,AV
+HR,53,AV
+LR,33,AV
+IN,50,AV
+SI,90,AV

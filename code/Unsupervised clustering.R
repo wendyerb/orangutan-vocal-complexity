@@ -10,7 +10,7 @@ library(clValid)   # For cluster validation
 
 # Part 1. Affinity over all features and observations -----------------------------
 ####Read in features 
-all.features <- read.csv('46-features.csv')
+all.features <- read.csv('data_V1/46-features.csv')
 
 ####Make pulse type a factor
 all.features$Pulse.Type <- factor(all.features$Pulse.Type, levels = c("HU", "VO", "HR","LR", "IN", "SI"))
@@ -43,7 +43,7 @@ all.features.affinity$affinity.id <- as.factor(cluster.dfq0@idx)
 # Part 2. Fuzzy with all features and observations --------------------------------
 
 ####Read in features 
-all.features <- read.csv('46-features.csv')
+all.features <- read.csv('data_V1/46-features.csv')
 
 ## Read in and scale data
 z_all.features<-scale(all.features[1:46], center = TRUE, scale = TRUE)
