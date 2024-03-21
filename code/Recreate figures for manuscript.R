@@ -28,7 +28,7 @@ svm.sig.method.1.all <-
     cross = nrow(all.features) # Setting the 'cross' parameter for cross-validation
     # This is not used for the final model but indicates leave-one-out cross-validation, which means one data point is left out as a test set in each iteration.
   )
-
+svm.sig.method.1.all$tot.accuracy
 # Predict based on trained model
 SVMPredictions <- predict(svm.sig.method.1.all,all.features[, 1:46])
 
@@ -54,8 +54,8 @@ SVMdf <- cbind.data.frame(Pulse.Type,perc.accuracy,Method)
 CombinedAV <- rbind.data.frame(SVMdf,av.classification[7:12,])
 
 # Create a bar plot
-png(file="/Users/wme8/Library/CloudStorage/Dropbox/Manuscripts/Submitted/Long Call Classification/PeerJ/Peer J Revision 2/New Figs 18Mar24/Figure3.png",
-    width=900, height=900)
+# png(file="/Users/wme8/Library/CloudStorage/Dropbox/Manuscripts/Submitted/Long Call Classification/PeerJ/Peer J Revision 2/New Figs 18Mar24/Figure3.png",
+#     width=900, height=900)
   ggplot(data = CombinedAV, aes(
     fill = Method,
     x = Pulse.Type,
@@ -65,7 +65,7 @@ png(file="/Users/wme8/Library/CloudStorage/Dropbox/Manuscripts/Submitted/Long Ca
   scale_fill_brewer() + 
   theme_classic(base_size = 18) + 
   xlab('Pulse type') + ylab('Classification accuracy (%)') + labs(fill = "Method")
-dev.off()
+#dev.off()
 
 # Figure 4: Affinity propagation ------------------------------------------
 all.features.affinity <- read.csv('data_V1/affinity_clusters.csv')

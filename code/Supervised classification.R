@@ -111,31 +111,33 @@ AggregatePerform$Group.1[which.max(AggregatePerform$x)]
 
 # Part 2. Calculate accuracy over 20 iterations -------------------------------------------------------------------------
 # Now we have chosen our kernel we run over multiple iterations 
+Unique.pulsetype <- unique(all.features.svm$Pulse.Type)
 
 # Initialize an empty data frame to store confusion matrix values
 ConfMatrixsvmDF <- data.frame()
+TotalAccuracyList <- list()
 
 # Loop over 20 iterations
 for(a in 1:20){
   
-  CombinedBalancedPulseTypeDF <- data.frame()
-  for(c in 1:length(Unique.pulsetype)){   
-    
-    TempSubsetPulse <- subset(all.features.svm,Pulse.Type==Unique.pulsetype[c])
-    
-    Samples.vec <- sample( c(1:nrow(TempSubsetPulse)), size = N.samples, replace = FALSE)
-    
-    all.features.temp <- TempSubsetPulse[Samples.vec,]
-    
-    CombinedBalancedPulseTypeDF <- rbind.data.frame(CombinedBalancedPulseTypeDF,all.features.temp)
-  }
+  # CombinedBalancedPulseTypeDF <- data.frame()
+  # for(c in 1:length(Unique.pulsetype)){   
+  #   
+  #   TempSubsetPulse <- subset(all.features.svm,Pulse.Type==Unique.pulsetype[c])
+  #   
+  #   Samples.vec <- sample( c(1:nrow(TempSubsetPulse)), size = N.samples, replace = FALSE)
+  #   
+  #   all.features.temp <- TempSubsetPulse[Samples.vec,]
+  #   
+  #   CombinedBalancedPulseTypeDF <- rbind.data.frame(CombinedBalancedPulseTypeDF,all.features.temp)
+  # }
   
   # Randomly sample indices for training data
-  Samples.vec <- sample( c(1:nrow(CombinedBalancedPulseTypeDF)), size = nrow(CombinedBalancedPulseTypeDF)*0.6, replace = FALSE)
+  Samples.vec <- sample( c(1:nrow(all.features.svm)), size = nrow(CombinedBalancedPulseTypeDF)*0.6, replace = FALSE)
   
   # Subset training and test data based on sampled indices
-  all.features.sub <- CombinedBalancedPulseTypeDF[Samples.vec,]
-  all.features.test <- CombinedBalancedPulseTypeDF[-Samples.vec,]
+  all.features.sub <- all.features.svm[Samples.vec,]
+  all.features.test <- all.features.svm[-Samples.vec,]
   
   # SVM model training using best kernel
   svm.sig.method.1.all <-
@@ -153,9 +155,11 @@ for(a in 1:20){
   # Generating a confusion matrix to evaluate the performance of the SVM model on the test data.
   ConfMatrix <-caret::confusionMatrix(all.features.test$Pulse.Type,SVMPredictions,'everything')
    
+  TotalAccuracyList[[a]] <- as.numeric(ConfMatrix$overall[1])
+  
   #Creating a data frame from the confusion matrix and adding a column with the percentage of correct predictions.
   ConfMatrixDF <- as.data.frame(as.matrix(ConfMatrix))
-  
+
   # Calculate accuracy for each class
   ProportionCorrect <- diag(as.matrix(ConfMatrixDF))/rowSums(ConfMatrixDF)
   
@@ -208,6 +212,11 @@ cbind.data.frame(PulseType,MeanSD)
 # 5        SI 0.54 ± 0.13
 # 6        VO 0.51 ± 0.18
 
+# Now for overall
+mean(unlist(TotalAccuracyList))
+min(unlist(TotalAccuracyList))
+max(unlist(TotalAccuracyList))
+sd(unlist(TotalAccuracyList))
 
 # Part 3. Recursive feature elimination -------------------------------------------
 
@@ -375,3 +384,104 @@ RandomSVM <- ggpubr::ggboxplot(data=SVM.rand.df,
 cowplot::plot_grid(RandomAffinity,RandomFuzzy,RandomTypicality,RandomSVM,
                    labels=c('A)', 'B)','C)','D)'),label_x = 0.9)
 
+# Part 6. Calculate accuracy over 20 iterations for new classification -------------------------------------------------------------------------
+all.features.updated <- read.csv('data_V1/500_pulses_new_classes_46features.csv')
+
+#### Check distribution of pulse types
+table(all.features.updated$New.Pulse)
+
+####Make pulse type a factor
+all.features.updated$Pulse.Type <- factor(all.features.updated$New.Pulse, levels = c("R", "I", "S"))
+
+# Now we have chosen our kernel we run over multiple iterations 
+Unique.pulsetype <- unique(all.features.updated$Pulse.Type)
+
+# Initialize an empty data frame to store confusion matrix values
+ConfMatrixsvmDF <- data.frame()
+TotalAccuracyList <- list()
+
+# Loop over 20 iterations
+for(a in 1:20){
+  
+    # Randomly sample indices for training data
+  Samples.vec <- sample( c(1:nrow(all.features.updated)), size = nrow(all.features.updated)*0.6, replace = FALSE)
+  
+  # Subset training and test data based on sampled indices
+  all.features.sub <- all.features.updated[Samples.vec,]
+  all.features.test <- all.features.updated[-Samples.vec,]
+  
+  # SVM model training using best kernel
+  svm.sig.method.1.all <-
+    svm(
+      all.features.sub[, -c(1:14)],  # Selecting columns 1 to 46 as features for training
+      all.features.sub$Pulse.Type,  # The target variable for training
+      kernel = 'linear',  # Using the polynomial kernel for SVM
+      cross = nrow(all.features.sub) # Setting the 'cross' parameter for cross-validation
+      # This is not used for the final model but indicates leave-one-out cross-validation, which means one data point is left out as a test set in each iteration.
+    )
+  
+  # Predicting the target variable using the SVM model on the test data.
+  SVMPredictions <- predict(svm.sig.method.1.all,all.features.test[, -c(1:14)])
+  
+  # Generating a confusion matrix to evaluate the performance of the SVM model on the test data.
+  ConfMatrix <-caret::confusionMatrix(all.features.test$Pulse.Type,SVMPredictions,'everything')
+  
+  TotalAccuracyList[[a]] <- as.numeric(ConfMatrix$overall[1])
+  
+  #Creating a data frame from the confusion matrix and adding a column with the percentage of correct predictions.
+  ConfMatrixDF <- as.data.frame(as.matrix(ConfMatrix))
+  
+  # Calculate accuracy for each class
+  ProportionCorrect <- diag(as.matrix(ConfMatrixDF))/rowSums(ConfMatrixDF)
+  
+  # Round the proportion values
+  ProportionCorrect <- round(ProportionCorrect,2)
+  
+  
+  Labels <- colnames(ConfMatrixDF)
+  
+  
+  # Create a data frame with label and balanced accuracy values
+  Values <- cbind.data.frame(Labels,ProportionCorrect)
+  colnames(Values) <- c('Labels','Proportion Correct')
+  
+  # Add iteration number
+  Values$Iteration <- a
+  
+  # Append Values to ConfMatrixsvmDF
+  ConfMatrixsvmDF <- rbind.data.frame(ConfMatrixsvmDF ,Values)
+}
+
+# Calculate mean accuracy for each label
+AggregatePerformSVMean <- aggregate(as.numeric(ConfMatrixsvmDF$`Proportion Correct`), 
+                                    list(ConfMatrixsvmDF$Labels), FUN=mean) 
+
+# Calculate standard deviation of balanced accuracy for each label
+AggregatePerformSVsd <- aggregate(as.numeric(ConfMatrixsvmDF$`Proportion Correct`), 
+                                  list(ConfMatrixsvmDF$Labels), FUN=sd) 
+
+# Round to two decimal
+AggregatePerformSVMean$x <- round(AggregatePerformSVMean$x,2)
+AggregatePerformSVMean$x
+
+# Round to two decimal
+AggregatePerformSVsd$x <- round(AggregatePerformSVsd$x,2)
+AggregatePerformSVsd$x
+
+MeanSD <- paste(AggregatePerformSVMean$x, '±', AggregatePerformSVsd$x)
+PulseType <- AggregatePerformSVMean$Group.1
+
+# Now we can print the mean and SD for balanced accuracy by pulse type
+cbind.data.frame(PulseType,MeanSD)
+
+# NOTE: there is some randomization so the values might be slightly different
+# PulseType      MeanSD
+# 1         I 0.57 ± 0.07
+# 2         R 0.86 ± 0.04
+# 3         S  0.9 ± 0.04
+
+# Now for overall
+mean(unlist(TotalAccuracyList))
+min(unlist(TotalAccuracyList))
+max(unlist(TotalAccuracyList))
+sd(unlist(TotalAccuracyList))
