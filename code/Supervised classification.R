@@ -133,7 +133,7 @@ for(a in 1:20){
   # }
   
   # Randomly sample indices for training data
-  Samples.vec <- sample( c(1:nrow(all.features.svm)), size = nrow(CombinedBalancedPulseTypeDF)*0.6, replace = FALSE)
+  Samples.vec <- sample( c(1:nrow(all.features.svm)), size = nrow(all.features.svm)*0.6, replace = FALSE)
   
   # Subset training and test data based on sampled indices
   all.features.sub <- all.features.svm[Samples.vec,]
@@ -462,7 +462,7 @@ AggregatePerformSVsd <- aggregate(as.numeric(ConfMatrixsvmDF$`Proportion Correct
 
 # Round to two decimal
 AggregatePerformSVMean$x <- round(AggregatePerformSVMean$x,2)
-AggregatePerformSVMean$x
+Mean <- AggregatePerformSVMean$x
 
 # Round to two decimal
 AggregatePerformSVsd$x <- round(AggregatePerformSVsd$x,2)
@@ -479,6 +479,12 @@ cbind.data.frame(PulseType,MeanSD)
 # 1         I 0.57 ± 0.07
 # 2         R 0.86 ± 0.04
 # 3         S  0.9 ± 0.04
+
+# Create new dataframe
+NewPulseClassification <- cbind.data.frame(PulseType,Mean,MeanSD)
+
+# Save it as a .csv
+write.csv(NewPulseClassification,'data_V1/NewPulseClassification.csv',row.names = F)
 
 # Now for overall
 mean(unlist(TotalAccuracyList))

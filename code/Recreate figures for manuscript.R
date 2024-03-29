@@ -9,46 +9,21 @@ library(umap)
 library(factoextra)
 
 # Figure 3- Barplot of classification accuracy (AV vs. SVM) for original pulse  --------
-all.features <- read.csv('data_V1/46-features.csv')
+OriginalPulseClassification <- read.csv('data_V1/OriginalPulseClassification.csv')
 
 av.classification <- read.csv('data_V1/SVM-AV_Accuracy_10Jan24.csv')
 
-#### Check distribution of pulse types
-table(all.features$Pulse.Type)
-
-####Make pulse type a factor
-all.features$Pulse.Type <- factor(all.features$Pulse.Type, levels = c("HU", "VO", "HR","LR", "IN", "SI"))
-
-# Run SVM
-svm.sig.method.1.all <-
-  svm(
-    all.features[, 1:46],  # Selecting columns 1 to 46 as features for training
-    all.features$Pulse.Type,  # The target variable for training
-    kernel = 'linear',  # Using the polynomial kernel for SVM
-    cross = nrow(all.features) # Setting the 'cross' parameter for cross-validation
-    # This is not used for the final model but indicates leave-one-out cross-validation, which means one data point is left out as a test set in each iteration.
-  )
-svm.sig.method.1.all$tot.accuracy
-# Predict based on trained model
-SVMPredictions <- predict(svm.sig.method.1.all,all.features[, 1:46])
-
-# Create confusion matrix
-table(all.features$Pulse.Type,SVMPredictions)
-
-# Calculate percent correct
-diag(table(all.features$Pulse.Type,SVMPredictions))/table(all.features$Pulse.Type)
-
 # Create vector with unique pulse types
-Pulse.Type <- unique(all.features$Pulse.Type)
+OriginalPulseClassification$Pulse.Type <- OriginalPulseClassification$PulseType
 
 # Calculate the percent accuracy
-perc.accuracy <- as.numeric(diag(table(all.features$Pulse.Type,SVMPredictions))/table(all.features$Pulse.Type)*100)
+OriginalPulseClassification$perc.accuracy <- OriginalPulseClassification$Mean*100
 
 # Create a vector with SVM for Method column
-Method <- rep('SVM',length(unique(all.features$Pulse.Type)))
+OriginalPulseClassification$Method <- rep('SVM',nrow(OriginalPulseClassification))
 
 # Combine into a new dataframe
-SVMdf <- cbind.data.frame(Pulse.Type,perc.accuracy,Method)
+SVMdf <- OriginalPulseClassification[,c('Pulse.Type','perc.accuracy','Method')]
 
 # Combine new SVM results with previous AV
 CombinedAV <- rbind.data.frame(SVMdf,av.classification[7:12,])
@@ -161,46 +136,21 @@ cowplot::plot_grid(Fig6a,Fig6b,
 
 # Figure 8 Barplot of classification accuracy for revised pulse scheme --------
 
-all.features.updated <- read.csv('data_V1/500_pulses_new_classes_46features.csv')
+NewPulseClassification <- read.csv('data_V1/NewPulseClassification.csv')
 
 av.classification.updated <- read.csv('data_V1/SVM-AV_NewPulse_Accuracy.csv')
 
-#### Check distribution of pulse types
-table(all.features.updated$New.Pulse)
-
-####Make pulse type a factor
-all.features.updated$Pulse.Type <- factor(all.features.updated$New.Pulse, levels = c("R", "I", "S"))
-
-# Run SVM
-svm.sig.method.1.all <-
-  svm(
-    all.features.updated[, 15:50],  # Selecting columns 1 to 46 as features for training
-    all.features.updated$Pulse.Type,  # The target variable for training
-    kernel = 'linear',  # Using the polynomial kernel for SVM
-    cross = nrow(all.features.updated) # Setting the 'cross' parameter for cross-validation
-    # This is not used for the final model but indicates leave-one-out cross-validation, which means one data point is left out as a test set in each iteration.
-  )
-
-# Predict based on trained model
-SVMPredictions <- predict(svm.sig.method.1.all,all.features.updated[, 15:50])
-
-# Create confusion matrix
-table(all.features.updated$Pulse.Type,SVMPredictions)
-
-# Calculate percent correct
-diag(table(all.features.updated$Pulse.Type,SVMPredictions))/table(all.features.updated$Pulse.Type)
-
-# Create vector with unique pulse types
-Pulse.Type <- unique(all.features.updated$Pulse.Type)
-
-# Calculate the percent accuracy
-perc.accuracy <- as.numeric(diag(table(all.features.updated$Pulse.Type,SVMPredictions))/table(all.features.updated$Pulse.Type)*100)
-
 # Create a vector with SVM for Method column
-Method <- rep('SVM',length(unique(all.features.updated$Pulse.Type)))
+NewPulseClassification$Method <- rep('SVM',nrow(NewPulseClassification))
+
+# Add column to match av classification
+NewPulseClassification$perc.accuracy <- NewPulseClassification$Mean*100
+
+# Add column to match av classification
+NewPulseClassification$Pulse.Type <- NewPulseClassification$PulseType
 
 # Combine into a new dataframe
-SVMdf <- cbind.data.frame(Pulse.Type,perc.accuracy,Method)
+SVMdf <- NewPulseClassification[,c('Pulse.Type','perc.accuracy','Method')]
 
 # Combine new SVM results with previous AV
 CombinedAV.updated <- rbind.data.frame(SVMdf,av.classification.updated[4:6,])
