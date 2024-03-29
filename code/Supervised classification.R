@@ -212,6 +212,11 @@ cbind.data.frame(PulseType,MeanSD)
 # 5        SI 0.54 ± 0.13
 # 6        VO 0.51 ± 0.18
 
+Mean <- AggregatePerformSVMean$x
+
+OriginalPulseClassification <- cbind.data.frame(PulseType,Mean,MeanSD)
+write.csv(OriginalPulseClassification,'data_V1/OriginalPulseClassification.csv',row.names = F)
+
 # Now for overall
 mean(unlist(TotalAccuracyList))
 min(unlist(TotalAccuracyList))
