@@ -15,6 +15,8 @@ av.classification <- read.csv('data_V1/SVM-AV_Accuracy_10Jan24.csv')
 
 # Create vector with unique pulse types
 OriginalPulseClassification$Pulse.Type <- OriginalPulseClassification$PulseType
+OriginalPulseClassification$Pulse.Type <- factor(OriginalPulseClassification$PulseType, levels = c("HU", "VO", "HR","LR", "IN", "SI"))
+
 
 # Calculate the percent accuracy
 OriginalPulseClassification$perc.accuracy <- OriginalPulseClassification$Mean*100
@@ -29,8 +31,8 @@ SVMdf <- OriginalPulseClassification[,c('Pulse.Type','perc.accuracy','Method')]
 CombinedAV <- rbind.data.frame(SVMdf,av.classification[7:12,])
 
 # Create a bar plot
-# png(file="/Users/wme8/Library/CloudStorage/Dropbox/Manuscripts/Submitted/Long Call Classification/PeerJ/Peer J Revision 2/New Figs 18Mar24/Figure3.png",
-#     width=900, height=900)
+png(file="/Users/wme8/Library/CloudStorage/Dropbox/Manuscripts/Submitted/Long Call Classification/PeerJ/Peer J Revision 2/New Figs 18Mar24/Figure3v2.png",
+     width=900, height=900)
   ggplot(data = CombinedAV, aes(
     fill = Method,
     x = Pulse.Type,
@@ -40,7 +42,7 @@ CombinedAV <- rbind.data.frame(SVMdf,av.classification[7:12,])
   scale_fill_brewer() + 
   theme_classic(base_size = 18) + 
   xlab('Pulse type') + ylab('Classification accuracy (%)') + labs(fill = "Method")
-#dev.off()
+dev.off()
 
 # Figure 4: Affinity propagation ------------------------------------------
 all.features.affinity <- read.csv('data_V1/affinity_clusters.csv')
@@ -148,6 +150,8 @@ NewPulseClassification$perc.accuracy <- NewPulseClassification$Mean*100
 
 # Add column to match av classification
 NewPulseClassification$Pulse.Type <- NewPulseClassification$PulseType
+NewPulseClassification$Pulse.Type <- factor(NewPulseClassification$Pulse.Type, levels = c("R", "I", "S"))
+
 
 # Combine into a new dataframe
 SVMdf <- NewPulseClassification[,c('Pulse.Type','perc.accuracy','Method')]
@@ -157,7 +161,7 @@ CombinedAV.updated <- rbind.data.frame(SVMdf,av.classification.updated[4:6,])
 
 
 # Create a bar plot
-png(file="/Users/wme8/Library/CloudStorage/Dropbox/Manuscripts/Submitted/Long Call Classification/PeerJ/Peer J Revision 2/New Figs 18Mar24/Figure8.png",
+png(file="/Users/wme8/Library/CloudStorage/Dropbox/Manuscripts/Submitted/Long Call Classification/PeerJ/Peer J Revision 2/New Figs 18Mar24/Figure8v2.png",
     width=900, height=900)
 ggplot(data = CombinedAV.updated, aes(
   fill = Method,

@@ -205,12 +205,12 @@ cbind.data.frame(PulseType,MeanSD)
 
 # NOTE: there is some randomization so the values might be slightly different
 # PulseType      MeanSD
-# 1        HR 0.47 ± 0.14
-# 2        HU  0.74 ± 0.1
-# 3        IN 0.45 ± 0.15
-# 4        LR 0.39 ± 0.12
-# 5        SI 0.54 ± 0.13
-# 6        VO 0.51 ± 0.18
+# 1        HR 0.64 ± 0.09
+# 2        HU 0.74 ± 0.12
+# 3        IN  0.27 ± 0.1
+# 4        LR 0.56 ± 0.06
+# 5        SI 0.93 ± 0.02
+# 6        VO 0.33 ± 0.11
 
 Mean <- AggregatePerformSVMean$x
 
@@ -318,7 +318,7 @@ all.features.svm <- all.features
       e1071::svm(
         all.features.sub[, 1:46],  # Selecting columns 1 to 46 as features for training
         all.features.sub$Pulse.Type,  # The target variable for training
-        kernel = 'linear',  # Using the sigmoid kernel for SVM
+        kernel = 'linear',  # Using the linear kernel for SVM
         cross = nrow(all.features.sub) # Setting the 'cross' parameter for cross-validation
         # This is not used for the final model but indicates leave-one-out cross-validation, which means one data point is left out as a test set in each iteration.
       )
@@ -481,9 +481,9 @@ cbind.data.frame(PulseType,MeanSD)
 
 # NOTE: there is some randomization so the values might be slightly different
 # PulseType      MeanSD
-# 1         I 0.57 ± 0.07
-# 2         R 0.86 ± 0.04
-# 3         S  0.9 ± 0.04
+# 1         I 0.65 ± 0.05
+# 2         R 0.86 ± 0.05
+# 3         S 0.92 ± 0.04
 
 # Create new dataframe
 NewPulseClassification <- cbind.data.frame(PulseType,Mean,MeanSD)
