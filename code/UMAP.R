@@ -5,9 +5,6 @@ library(factoextra)
 library(ggpubr)    # For creating plots
 
 
-#### Set working directory
-#setwd('/Users/Wendy/github/orangutan-vocal-complexity/data')
-
 ####Read in features 
 all.features <- read.csv('data_V1/46-features.csv')
 all.features.affinity <- read.csv('data_V1/affinity_clusters.csv')

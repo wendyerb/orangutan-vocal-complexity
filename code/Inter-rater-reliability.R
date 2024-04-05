@@ -2,9 +2,6 @@
 
 library(irr)
 
-#### Set working directory
-setwd('/Users/Wendy/github/orangutan-vocal-complexity/data')
-
 ## Read in csv files
 ## original 6 classes
 IRR <- read.csv("irr_6classes.csv")

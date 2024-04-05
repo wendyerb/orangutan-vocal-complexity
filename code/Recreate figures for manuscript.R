@@ -31,7 +31,7 @@ SVMdf <- OriginalPulseClassification[,c('Pulse.Type','perc.accuracy','Method')]
 CombinedAV <- rbind.data.frame(SVMdf,av.classification[7:12,])
 
 # Create a bar plot
-png(file="/Users/wme8/Library/CloudStorage/Dropbox/Manuscripts/Submitted/Long Call Classification/PeerJ/Peer J Revision 2/New Figs 18Mar24/Figure3v2.png",
+png(file="Figure3.png",
      width=900, height=900)
   ggplot(data = CombinedAV, aes(
     fill = Method,
@@ -52,7 +52,7 @@ all.features.affinity$affinity.id <- as.factor(all.features.affinity$affinity.id
 cbPalette <- c("#762a83", "#af8dc3", "#e7d4e8", "#d9f0d3", "#7fbf7b", "#1b7837")
 
 # Create a stacked bar plot
-png(file="/Users/wme8/Library/CloudStorage/Dropbox/Manuscripts/Submitted/Long Call Classification/PeerJ/Peer J Revision 2/New Figs 18Mar24/Figure4.png",
+png(file="Figure4.png",
     width=900, height=900)
 all.features.affinity %>% 
   ggplot(aes(x=affinity.id, fill = Pulse.Type)) +
@@ -92,7 +92,7 @@ Fig5b <- Typicality %>%
   labs(x = "Typicality coefficient", y = NULL, fill="Pulse") 
 
 # Arrange figures 5a-5b in a grid and save
-png(file="/Users/wme8/Library/CloudStorage/Dropbox/Manuscripts/Submitted/Long Call Classification/PeerJ/Peer J Revision 2/New Figs 18Mar24/Figure5.png",
+png(file="Figure5.png",
     width=900, height=900)
 cowplot::plot_grid(Fig5a,Fig5b,
                    labels=c('a)', 'b)'),label_x = 0.8)
@@ -126,7 +126,7 @@ Fig6b <- Typical %>%
 
 # Arrange figures 6a-5b in a grid
 # Arrange figures 5a-5b in a grid and save
-png(file="/Users/wme8/Library/CloudStorage/Dropbox/Manuscripts/Submitted/Long Call Classification/PeerJ/Peer J Revision 2/New Figs 18Mar24/Figure6.png",
+png(file="Figure6.png",
     width=900, height=900)
 cowplot::plot_grid(Fig6a,Fig6b,
                    labels=c('a)', 'b)'),label_x = 0.8)
@@ -161,7 +161,7 @@ CombinedAV.updated <- rbind.data.frame(SVMdf,av.classification.updated[4:6,])
 
 
 # Create a bar plot
-png(file="/Users/wme8/Library/CloudStorage/Dropbox/Manuscripts/Submitted/Long Call Classification/PeerJ/Peer J Revision 2/New Figs 18Mar24/Figure8v2.png",
+png(file="Figure8.png",
     width=900, height=900)
 ggplot(data = CombinedAV.updated, aes(
   fill = Method,
