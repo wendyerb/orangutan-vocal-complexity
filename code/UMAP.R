@@ -16,6 +16,7 @@ cbPalette <- c("#762a83", "#af8dc3", "#e7d4e8", "#d9f0d3", "#7fbf7b", "#1b7837")
 cbPalette1 <- c("#d73027", "#fc8d59", "#fee090", "#e0f3f8", "#91bfdb", "#4575b4")
 
 ## Create UMAP with affinity propagation clusters labeled
+cbPalette <- c("#762a83", "#af8dc3", "#7fbf7b", "#1b7837")
 OrangPulse.umap <- 
   umap::umap(all.features[, 1:46],
              controlscale=TRUE,scale=3)
@@ -43,6 +44,7 @@ myplot.for.OrangPulseAffinity
 
 
 ## Create UMAP with typical fuzzy clusters labeled
+cbPalette <- c("#762a83",  "#1b7837")
 
 plot.for.OrangPulseFuzzy <-
   cbind.data.frame(OrangPulse.umap$layout[,1:2],
@@ -64,6 +66,7 @@ myplot.for.OrangPulseFuzzy <-
 myplot.for.OrangPulseFuzzy
 
 ## Create UMAP based on 46 features with human (A/V) labels
+cbPalette <- c("#762a83", "#af8dc3", "#e7d4e8", "#d9f0d3", "#7fbf7b", "#1b7837")
 
 all.features$Pulse.Type <- factor(all.features$Pulse.Type, levels = c("HU", "VO", "HR","LR", "IN", "SI"))
 
@@ -86,6 +89,7 @@ myplot.for.OrangPulseHumanID <-
 myplot.for.OrangPulseHumanID
 
 ## Create UMAP based on raw spectrograms with raw spectrograms
+cbPalette <- c("#762a83", "#af8dc3", "#e7d4e8", "#d9f0d3", "#7fbf7b", "#1b7837")
 raw.spectrograms$Pulse <- factor(raw.spectrograms$Pulse, levels = c("HU", "VO", "HR","LR", "IN", "SI"))
 
 myplot.for.OrangPulseSpectrograms <-
